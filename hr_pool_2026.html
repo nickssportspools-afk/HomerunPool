@@ -91,6 +91,15 @@
   .section-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .section-title span { font-size: 12px; color: #8fb3d4; font-weight: normal; }
 
+  /* STICKY HEADERS (freeze pane effect) */
+  .table-wrap { overflow-y: auto; max-height: 70vh; }
+  thead th { position: sticky; top: 0; z-index: 2; background: #0f2236 !important; box-shadow: 0 1px 0 #1e3a5f; }
+  .team-block-body thead th { position: sticky; top: 0; z-index: 2; background: #0a1e33 !important; }
+
+  /* STICKY HEADERS */
+  thead { position: sticky; top: 0; z-index: 2; }
+  .table-wrap { max-height: 70vh; overflow-y: auto; }
+
   /* RESPONSIVE */
   @media (max-width: 600px) {
     .site-header h1 { font-size: 15px; }
@@ -243,7 +252,7 @@
 </div><!-- /content -->
 
 <script>
-const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTyRkmNCzLEUgsYrNiDgjz9xL0KH8_FybCTpsOYvIE4W9tc4WeScNatL_iHuOoQLd6RScuR_x4Srdv3/pub?single=true&output=csv&gid=';
+
 const GIDS = {
   readme:        '2137655048',
   master:        '2005646421',
@@ -259,15 +268,34 @@ const GIDS = {
 const cache = {};
 const loaded = {};
 
+function sanitizeCell(c) {
+  if (!c || c === '#N/A' || c === '#REF!' || c === '#VALUE!' || c === '#ERROR!') return '—';
+  return c;
+}
+
+const SHEET_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyRkmNCzLEUgsYrNiDgjz9xL0KH8_FybCTpsOYvIE4W9tc4WeScNatL_iHuOoQLd6RScuR_x4Srdv3/pub?single=true&output=csv&gid=";
+const PROXIES = [
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
 async function fetchCSV(gid) {
   if (cache[gid]) return cache[gid];
-  const url = BASE + gid;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
-  const rows = parseCSV(text);
-  cache[gid] = rows;
-  return rows;
+  const target = SHEET_BASE + gid;
+  let lastErr;
+  for (const proxy of PROXIES) {
+    try {
+      const res = await fetch(proxy(target));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      if (!text || text.startsWith('<!')) throw new Error('Bad response');
+      const rows = parseCSV(text);
+      cache[gid] = rows;
+      return rows;
+    } catch(e) { lastErr = e; }
+  }
+  throw lastErr;
 }
 
 function parseCSV(text) {
@@ -306,7 +334,7 @@ function loadTab(id) {
   loaded[id] = true;
   switch(id) {
     case 'standings':     loadStandings(); break;
-    case 'monthly':       loadGenericTable('monthly',  GIDS.monthly,  'monthly-head',  'monthly-body',  'monthly-updated'); break;
+    case 'monthly':       loadMonthly(); break;
     case 'master':        loadRosterBlocks(); break;
     case 'individual':    loadIndividualRoster(); break;
     case 'mlbstats':      loadGenericTable('mlbstats', GIDS.mlbstats, 'mlb-head',      'mlb-body',      'mlb-updated'); break;
@@ -331,6 +359,7 @@ async function loadStandings() {
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i];
       if (r.every(c => !c)) continue;
+      if (r.some(c => c.trim() === '#N/A')) continue;
       rank++;
       const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-cell';
       const tr = document.createElement('tr');
@@ -349,6 +378,39 @@ async function loadStandings() {
 }
 
 // ── GENERIC TABLE ──────────────────────────────────────────
+async function loadMonthly() {
+  try {
+    const rows = await fetchCSV(GIDS.monthly);
+    if (!rows.length) throw new Error('No data');
+    const head = document.getElementById('monthly-head');
+    const body = document.getElementById('monthly-body');
+    // Find the header row (contains PLACE or TEAM NAME)
+    let headerIdx = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].some(c => c && (c.toUpperCase().includes('PLACE') || c.toUpperCase().includes('TEAM NAME')))) {
+        headerIdx = i; break;
+      }
+    }
+    // Build clean headers - merge split month cells
+    const rawHeaders = rows[headerIdx];
+    const cleanHeaders = rawHeaders.map(h => h ? h.replace(/\n/g, ' ').trim() : '').filter((h,i) => i < 2 || h);
+    head.innerHTML = cleanHeaders.map(h => `<th>${h || ''}</th>`).join('');
+    body.innerHTML = '';
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (r.every(c => !c)) continue;
+      // Skip instruction/note rows (col A has text but no team data)
+      if (r[0] && !r[1] && !r[2]) continue;
+      const tr = document.createElement('tr');
+      tr.innerHTML = r.map(c => `<td>${sanitizeCell(c)}</td>`).join('');
+      body.appendChild(tr);
+    }
+    document.getElementById('monthly-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById('monthly-body').innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load monthly standings. ${e.message}</div></td></tr>`;
+  }
+}
+
 async function loadGenericTable(gidKey, gid, headId, bodyId, updatedId) {
   try {
     const rows = await fetchCSV(gid);
@@ -361,7 +423,7 @@ async function loadGenericTable(gidKey, gid, headId, bodyId, updatedId) {
       const r = rows[i];
       if (r.every(c => !c)) continue;
       const tr = document.createElement('tr');
-      tr.innerHTML = r.map(c => `<td>${c}</td>`).join('');
+      tr.innerHTML = r.map(c => `<td>${sanitizeCell(c)}</td>`).join('');
       body.appendChild(tr);
     }
     document.getElementById(updatedId).textContent = 'Updated: ' + now();
@@ -389,23 +451,32 @@ async function loadRosterBlocks() {
 }
 
 function parseTeamBlocks(rows) {
+  // Master Roster layout:
+  // - Team header row: col A = team name, col B = owner, col C = cap info (few cells populated)
+  // - Column header row: col A = "Rank" or "RANK"
+  // - Player rows: col A = rank number, col B = player name, etc.
+  // - Blank row between teams
   const blocks = [];
   let current = null;
-  let headerRow = null;
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const first = r[0] ? r[0].trim() : '';
-    const nonEmpty = r.filter(c => c.trim()).length;
-    // Detect team header row: typically has team name in col A, few populated cells
-    // A player data row usually has rank (number) in col A OR player name
-    const looksLikeHeader = nonEmpty <= 4 && first && isNaN(first) && !first.toLowerCase().includes('rank') && !first.toLowerCase().includes('player');
-    if (looksLikeHeader && (i === 0 || rows[i-1].every(c => !c.trim()) || current)) {
-      if (current) blocks.push(current);
-      current = { title: first, meta: r.slice(1).filter(c=>c).join(' · '), players: [], headers: [] };
-    } else if (current && first.toLowerCase() === 'rank' || (current && r.some(c => c.toLowerCase && c.toLowerCase() === 'player'))) {
-      current.headers = r;
-    } else if (current && first && !r.every(c => !c.trim())) {
+    const colA = r[0] ? r[0].trim() : '';
+    const colB = r[1] ? r[1].trim() : '';
+    if (!colA) continue; // skip blank rows
+    // Column header row (Rank, Player, etc.) — attach to current block
+    if (colA.toLowerCase() === 'rank' || colA.toLowerCase() === 'rank #') {
+      if (current) current.headers = r;
+      continue;
+    }
+    // Player row — col A is a number (rank)
+    if (!isNaN(colA) && colA !== '' && current) {
       current.players.push(r);
+      continue;
+    }
+    // Team header row — col A is text, not a number, not "rank"
+    if (isNaN(colA) && colA) {
+      if (current) blocks.push(current);
+      current = { title: colA, meta: [colB, r[2]].filter(c=>c).join(' · '), players: [], headers: [] };
     }
   }
   if (current) blocks.push(current);
@@ -455,9 +526,12 @@ function toggleBlock(header) {
 let individualData = null;
 async function loadIndividualRoster() {
   try {
-    const rows = await fetchCSV(GIDS.individual);
+    // Use Master Roster data (all teams) instead of the single-view Individual tab
+    const rows = await fetchCSV(GIDS.master);
     individualData = parseTeamBlocks(rows);
     const sel = document.getElementById('individual-select');
+    // Sort teams alphabetically for easy lookup
+    individualData.sort((a, b) => a.title.localeCompare(b.title));
     individualData.forEach((b, i) => {
       const opt = document.createElement('option');
       opt.value = i;
