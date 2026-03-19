@@ -280,13 +280,26 @@ const PROXIES = [
   url => `https://api.codetabs.com/v1/proxy?quest=${url}`,
 ];
 
+async function fetchWithTimeout(url, ms=8000) {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(id);
+    return res;
+  } catch(e) {
+    clearTimeout(id);
+    throw e;
+  }
+}
+
 async function fetchCSV(gid) {
   if (cache[gid]) return cache[gid];
   const target = SHEET_BASE + gid;
   let lastErr;
   for (const proxy of PROXIES) {
     try {
-      const res = await fetch(proxy(target));
+      const res = await fetchWithTimeout(proxy(target), 8000);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const text = await res.text();
       if (!text || text.startsWith('<!')) throw new Error('Bad response');
@@ -295,7 +308,7 @@ async function fetchCSV(gid) {
       return rows;
     } catch(e) { lastErr = e; }
   }
-  throw lastErr;
+  throw lastErr || new Error('All proxies failed');
 }
 
 function parseCSV(text) {
@@ -604,34 +617,36 @@ async function loadMonthly() {
     body.innerHTML = '';
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i];
-      // Col B = place, Col C = team name, Col D = total, E-K = monthly
-      const place = (r[1] || '').trim();
-      const team  = (r[2] || '').trim();
-      const total = (r[3] || '').trim();
-      const mar   = (r[4] || '').trim();
-      const may   = (r[5] || '').trim();
-      const jun   = (r[6] || '').trim();
-      const jul   = (r[7] || '').trim();
-      const aug   = (r[8] || '').trim();
-      const sep   = (r[9] || '').trim();
-      // Skip rows with no team name
-      if (!team) continue;
-      // Skip header/junk rows and timestamp rows
-      // Skip only exact header/junk matches
-      const skipExact = ['place','team name','total','march/april','may','june','july','august','sept','monthly standings','season standings'];
-      if (skipExact.includes(team.toLowerCase())) continue;
-      if (team.toLowerCase().startsWith('last updated')) continue;
-      if (team.toLowerCase().startsWith('once data')) continue;
-      // Skip timestamp rows - contain "at" and "pm" or "am" or year like 2026
-      if (team.match(/\d{4}\s+at\s+\d/i)) continue;
-      if (team.match(/^\d{4}\s/) && team.toLowerCase().includes('pm')) continue;
-      // Skip if place column contains a month name (timestamp row)
-      const place = (r[1] || '').trim();
-      if (place.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i) && team.match(/\d{4}/)) continue;
+      const colA = (r[0] || '').trim();
+      const colB = (r[1] || '').trim();
+      const colC = (r[2] || '').trim();
+      const colD = (r[3] || '').trim();
+      const colE = (r[4] || '').trim();
+      const colF = (r[5] || '').trim();
+      const colG = (r[6] || '').trim();
+      const colH = (r[7] || '').trim();
+      const colI = (r[8] || '').trim();
+      const colJ = (r[9] || '').trim();
+
+      // Skip blank rows
+      if (!colB && !colC) continue;
+      // Skip header row
+      if (colB.toLowerCase() === 'place') continue;
+      // Skip title row (MONTHLY STANDINGS)
+      if (colC.toLowerCase().includes('monthly standings') || colC.toLowerCase().includes('season standings')) continue;
+      // Skip timestamp row - col A or B contains a month+day pattern like "Last" or "March 19"
+      if (colA.toLowerCase().includes('last') || colB.toLowerCase().includes('last')) continue;
+      if (colC.match(/^\d{4}\s+at/i)) continue;
+      if (colB.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d/i)) continue;
+      // Skip once data note
+      if (colA.toLowerCase().includes('once') || colB.toLowerCase().includes('once')) continue;
       // Skip #N/A rows
-      if (team === '#N/A' || total === '#N/A') continue;
+      if (colC === '#N/A') continue;
+      // Skip rows with no team name
+      if (!colC) continue;
+
       const tr = document.createElement('tr');
-      tr.innerHTML = [place,team,total,mar,may,jun,jul,aug,sep].map(c => `<td>${c || ''}</td>`).join('');
+      tr.innerHTML = [colB,colC,colD,colE,colF,colG,colH,colI,colJ].map(c => `<td>${c || ''}</td>`).join('');
       body.appendChild(tr);
     }
     document.getElementById('monthly-updated').textContent = 'Updated: ' + now();
