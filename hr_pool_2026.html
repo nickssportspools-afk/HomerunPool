@@ -451,36 +451,58 @@ async function loadRosterBlocks() {
 }
 
 function parseTeamBlocks(rows) {
-  // Master Roster layout:
-  // - Team header row: col A = team name, col B = owner, col C = cap info (few cells populated)
-  // - Column header row: col A = "Rank" or "RANK"
-  // - Player rows: col A = rank number, col B = player name, etc.
-  // - Blank row between teams
+  // Master Roster layout (from screenshot):
+  // Row 1: headers - #Teams, ENTRY NAME, WEIGHTED HRS, PLAYER, TEAM, 2026 HRs, Top 7 Rank, IL Status
+  // Col A = team number (spans 10 player rows)
+  // Col B = team name (appears on first player row of each team, e.g. "BALLS DEEP")
+  // Col C = weighted HRs per player
+  // Col D = player name
+  // Col E = MLB team
+  // Col F = 2026 HRs
+  // Col G = Top 7 Rank
+  // Col H = IL Status
+  // TOTALS row appears after each team's 10 players
   const blocks = [];
   let current = null;
+  let headers = [];
+
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const colA = r[0] ? r[0].trim() : '';
-    const colB = r[1] ? r[1].trim() : '';
-    if (!colA) continue; // skip blank rows
-    // Column header row (Rank, Player, etc.) — attach to current block
-    if (colA.toLowerCase() === 'rank' || colA.toLowerCase() === 'rank #') {
-      if (current) current.headers = r;
+    const colA = (r[0] || '').trim();
+    const colB = (r[1] || '').trim();
+    const colC = (r[2] || '').trim();
+    const colD = (r[3] || '').trim();
+
+    // Header row
+    if (colA === '# Teams' || colA === '#Teams') {
+      headers = r;
       continue;
     }
-    // Player row — col A is a number (rank)
-    if (!isNaN(colA) && colA !== '' && current) {
-      current.players.push(r);
+    // TOTALS row — close out current team
+    if (colB.toUpperCase() === 'TOTALS') {
       continue;
     }
-    // Team header row — col A is text, not a number, not "rank"
-    if (isNaN(colA) && colA) {
-      if (current) blocks.push(current);
-      current = { title: colA, meta: [colB, r[2]].filter(c=>c).join(' · '), players: [], headers: [] };
+    // Team number in col A = start of a new team block
+    if (colA && !isNaN(colA)) {
+      // Col B has team name if present
+      if (colB && colB.toUpperCase() !== 'TOTALS') {
+        if (current) blocks.push(current);
+        current = { title: colB, players: [], headers: ['Weighted HRs','Player','Team','2026 HRs','Top 7 Rank','IL Status'] };
+      }
+      // Add player row if col D has a player name
+      if (current && colD) {
+        current.players.push([colC, colD, r[4]||'', r[5]||'', r[6]||'', r[7]||'']);
+      }
+      continue;
+    }
+    // Continuation row (col A empty, same team) — add player
+    if (!colA && current && colD) {
+      current.players.push([colC, colD, r[4]||'', r[5]||'', r[6]||'', r[7]||'']);
     }
   }
   if (current) blocks.push(current);
-  return blocks;
+  // Filter out teams with no name
+  return blocks.filter(b => b.title && b.title !== '#N/A');
 }
 
 function buildTeamBlock(block) {
@@ -553,6 +575,51 @@ function showIndividualTeam(idx) {
   el.querySelector('.team-block-body').style.display = '';
   display.innerHTML = '';
   display.appendChild(el);
+}
+
+// ── MONTHLY STANDINGS ─────────────────────────────────────────
+async function loadMonthly() {
+  try {
+    const rows = await fetchCSV(GIDS.monthly);
+    const head = document.getElementById('monthly-head');
+    const body = document.getElementById('monthly-body');
+    // Hardcode headers since merged cells break CSV export
+    head.innerHTML = '<th>Place</th><th>Team Name</th><th>Total</th><th>March/April</th><th>May</th><th>June</th><th>July</th><th>August</th><th>Sept</th>';
+    body.innerHTML = '';
+    // Skip until we find real data rows (team names in col B or C)
+    // Real data rows have a team name (text) in col B or C and numbers after
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      // Skip obvious junk: Last Updated, MONTHLY STANDINGS, PLACE header row, notes
+      const joined = r.join('').trim();
+      if (!joined) continue;
+      if (joined.toLowerCase().includes('last') && joined.toLowerCase().includes('updated')) continue;
+      if (joined.toLowerCase().includes('monthly standings')) continue;
+      if (joined.toLowerCase().includes('once data')) continue;
+      if (r[1] && r[1].trim().toLowerCase() === 'place') continue;
+      // Real data: col B or C has a team name (non-empty text, not a month name or number)
+      const teamCol = r[2] ? r[2].trim() : (r[1] ? r[1].trim() : '');
+      if (!teamCol) continue;
+      const skipWords = ['place','team','total','march','april','may','june','july','august','sept','last','updated','once','how','data'];
+      if (skipWords.some(w => teamCol.toLowerCase().includes(w))) continue;
+      // Build row with 9 columns: place, team, total, mar/apr, may, jun, jul, aug, sept
+      const place = r[1] ? r[1].trim() : '';
+      const team  = r[2] ? r[2].trim() : '';
+      const total = r[3] ? r[3].trim() : '';
+      const mar   = r[4] ? r[4].trim() : '';
+      const may   = r[5] ? r[5].trim() : '';
+      const jun   = r[6] ? r[6].trim() : '';
+      const jul   = r[7] ? r[7].trim() : '';
+      const aug   = r[8] ? r[8].trim() : '';
+      const sep   = r[9] ? r[9].trim() : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = [place,team,total,mar,may,jun,jul,aug,sep].map(c => `<td>${c}</td>`).join('');
+      body.appendChild(tr);
+    }
+    document.getElementById('monthly-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById('monthly-body').innerHTML = `<tr><td colspan="9"><div class="error-msg">Could not load monthly standings. ${e.message}</div></td></tr>`;
+  }
 }
 
 // ── IL ────────────────────────────────────────────────────────
