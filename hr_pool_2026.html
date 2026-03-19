@@ -360,22 +360,31 @@ async function loadStandings() {
       if (isHeader) { headerIdx = i; break; }
     }
     const headers = rows[headerIdx];
-    head.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+    head.innerHTML = '<th>#</th>' + headers.filter(h=>h.trim()).map(h => `<th>${h}</th>`).join('');
     body.innerHTML = '';
+    let rank = 0;
     for (let i = headerIdx + 1; i < rows.length; i++) {
       const r = rows[i];
       if (r.every(c => !c)) continue;
-      // Skip rows with no team name (col C empty)
+      // Team name is in col C (index 2), place in col B (index 1)
       const teamName = (r[2] || '').trim();
       if (!teamName) continue;
       // Skip junk rows
-      const skipWords = ['season standings','place','team name','last','updated','once','col'];
+      const skipWords = ['season standings','place','team name','last','updated','once','col','hrs back'];
       if (skipWords.some(w => teamName.toLowerCase().includes(w))) continue;
+      // Skip rows with no team name (empty slots)
+      if (!isNaN(teamName) && teamName === '') continue;
+      rank++;
+      const place = (r[1] || '').trim();
+      const total = (r[3] || '').trim();
+      const hrsBack = (r[4] || '').trim();
+      const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
       const tr = document.createElement('tr');
-      tr.innerHTML = r.map((c, ci) => {
-        const isNum = !isNaN(c) && c !== '';
-        return `<td class="${isNum && ci > 0 ? 'num' : ''}">${c}</td>`;
-      }).join('');
+      tr.innerHTML = `<td class="rank-cell ${rankClass}">${rank}</td>
+        <td>${place}</td>
+        <td>${teamName}</td>
+        <td class="num">${total}</td>
+        <td class="num">${hrsBack}</td>`;
       body.appendChild(tr);
     }
     document.getElementById('standings-count').textContent = `· ${rank} teams`;
