@@ -353,21 +353,30 @@ async function loadStandings() {
     const head = document.getElementById('standings-head');
     const body = document.getElementById('standings-body');
     const headers = rows[0];
-    head.innerHTML = '<th class="rank-cell">#</th>' + headers.map(h => `<th>${h}</th>`).join('');
+    // Find real header row (PLACE, TEAM NAME, TOTAL, etc.)
+    let headerIdx = 0;
+    for (let i = 0; i < Math.min(6, rows.length); i++) {
+      const vals = rows[i].filter(c => c.trim());
+      const isHeader = vals.some(v => v.toUpperCase() === 'PLACE' || v.toUpperCase() === 'TEAM NAME');
+      if (isHeader) { headerIdx = i; break; }
+    }
+    const headers = rows[headerIdx];
+    head.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
     body.innerHTML = '';
-    let rank = 0;
-    for (let i = 1; i < rows.length; i++) {
+    for (let i = headerIdx + 1; i < rows.length; i++) {
       const r = rows[i];
       if (r.every(c => !c)) continue;
-      if (r.some(c => c.trim() === '#N/A')) continue;
-      rank++;
-      const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-cell';
+      // Skip rows with no team name (col C empty)
+      const teamName = (r[2] || '').trim();
+      if (!teamName) continue;
+      // Skip junk rows
+      const skipWords = ['season standings','place','team name','last','updated','once','col'];
+      if (skipWords.some(w => teamName.toLowerCase().includes(w))) continue;
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="rank-cell ${rankClass}">${rank}</td>` +
-        r.map((c, ci) => {
-          const isNum = !isNaN(c) && c !== '';
-          return `<td class="${isNum && ci > 0 ? 'num' : ''}">${c}</td>`;
-        }).join('');
+      tr.innerHTML = r.map((c, ci) => {
+        const isNum = !isNaN(c) && c !== '';
+        return `<td class="${isNum && ci > 0 ? 'num' : ''}">${c}</td>`;
+      }).join('');
       body.appendChild(tr);
     }
     document.getElementById('standings-count').textContent = `· ${rank} teams`;
@@ -599,9 +608,11 @@ async function loadMonthly() {
       const sep   = (r[9] || '').trim();
       // Skip rows with no team name
       if (!team) continue;
-      // Skip header/junk rows
-      const skipWords = ['place','team name','total','march','monthly','last','updated','once','col','will show','how it'];
+      // Skip header/junk rows and timestamp rows
+      const skipWords = ['place','team name','total','march','monthly','last','updated','once','col','will show','how it','pm','am'];
       if (skipWords.some(w => team.toLowerCase().includes(w))) continue;
+      // Skip timestamp rows (contain numbers and month names)
+      if (team.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i)) continue;
       // Skip #N/A rows
       if (team === '#N/A' || total === '#N/A') continue;
       const tr = document.createElement('tr');
@@ -682,4 +693,3 @@ loadTab('readme');
 </script>
 </body>
 </html>
-
