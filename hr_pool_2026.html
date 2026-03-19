@@ -352,7 +352,6 @@ async function loadStandings() {
     if (!rows.length) throw new Error('No data');
     const head = document.getElementById('standings-head');
     const body = document.getElementById('standings-body');
-    const headers = rows[0];
     // Find real header row (PLACE, TEAM NAME, TOTAL, etc.)
     let headerIdx = 0;
     for (let i = 0; i < Math.min(6, rows.length); i++) {
@@ -693,4 +692,3 @@ loadTab('readme');
 </script>
 </body>
 </html>
-
