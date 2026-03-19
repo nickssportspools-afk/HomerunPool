@@ -66,7 +66,7 @@
   .filter-row select { cursor: pointer; }
   .filter-row select option { background: #0f2236; }
 
-  /* TEAM SECTION CARDS (Master Roster / Individual Roster) */
+  /* TEAM SECTION CARDS (Main Rosters / Individual Roster) */
   .team-block { background: #0f2236; border: 1px solid #1e3a5f; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
   .team-block-header { background: #132b44; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a5f; cursor: pointer; }
   .team-block-header .team-title { font-size: 14px; font-weight: bold; color: #fff; }
@@ -122,7 +122,7 @@
 <div class="tab-bar">
   <button class="tab-btn active" onclick="showTab('standings')">🏆 Season Standings</button>
   <button class="tab-btn" onclick="showTab('monthly')">📅 Monthly</button>
-  <button class="tab-btn" onclick="showTab('master')">📋 Master Roster</button>
+  <button class="tab-btn" onclick="showTab('master')">📋 Main Rosters</button>
   <button class="tab-btn" onclick="showTab('individual')">🔍 Individual Roster</button>
   <button class="tab-btn" onclick="showTab('mlbstats')">📊 MLB Player Stats</button>
   <button class="tab-btn" onclick="showTab('hrstats')">💥 HR Derby Stats</button>
@@ -160,9 +160,9 @@
     <p class="updated" id="monthly-updated"></p>
   </div>
 
-  <!-- MASTER ROSTER -->
+  <!-- MAIN ROSTERS -->
   <div id="master" class="section">
-    <div class="section-title">Master Roster <span id="master-count"></span></div>
+    <div class="section-title">Main Rosters <span id="master-count"></span></div>
     <div class="filter-row">
       <input type="text" id="master-search" placeholder="Search team, owner, or player..." oninput="filterBlocks('master-blocks', this.value)" />
     </div>
@@ -432,7 +432,7 @@ async function loadGenericTable(gidKey, gid, headId, bodyId, updatedId) {
   }
 }
 
-// ── MASTER ROSTER BLOCKS ────────────────────────────────────
+// ── MAIN ROSTERS BLOCKS ────────────────────────────────────
 async function loadRosterBlocks() {
   const container = document.getElementById('master-blocks');
   try {
@@ -451,7 +451,7 @@ async function loadRosterBlocks() {
 }
 
 function parseTeamBlocks(rows) {
-  // Master Roster layout (from screenshot):
+  // Main Rosters layout (from screenshot):
   // Row 1: headers - #Teams, ENTRY NAME, WEIGHTED HRS, PLAYER, TEAM, 2026 HRs, Top 7 Rank, IL Status
   // Col A = team number (spans 10 player rows)
   // Col B = team name (appears on first player row of each team, e.g. "BALLS DEEP")
@@ -548,7 +548,7 @@ function toggleBlock(header) {
 let individualData = null;
 async function loadIndividualRoster() {
   try {
-    // Use Master Roster data (all teams) instead of the single-view Individual tab
+    // Use Main Rosters data (all teams) instead of the single-view Individual tab
     const rows = await fetchCSV(GIDS.master);
     individualData = parseTeamBlocks(rows);
     const sel = document.getElementById('individual-select');
