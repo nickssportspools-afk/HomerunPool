@@ -120,15 +120,15 @@
 </div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('standings')">🏆 Season Standings</button>
-  <button class="tab-btn" onclick="showTab('monthly')">📅 Monthly</button>
+  <button class="tab-btn active" onclick="showTab('readme')">ℹ️ Rules</button>
   <button class="tab-btn" onclick="showTab('master')">📋 Main Rosters</button>
   <button class="tab-btn" onclick="showTab('individual')">🔍 Individual Roster</button>
+  <button class="tab-btn" onclick="showTab('standings')">🏆 Season Standings</button>
+  <button class="tab-btn" onclick="showTab('monthly')">📅 Monthly Standings</button>
+  <button class="tab-btn" onclick="showTab('hrstats')">💥 HR Derby Player Stats</button>
   <button class="tab-btn" onclick="showTab('mlbstats')">📊 MLB Player Stats</button>
-  <button class="tab-btn" onclick="showTab('hrstats')">💥 HR Derby Stats</button>
-  <button class="tab-btn" onclick="showTab('il')">🏥 Injured List</button>
   <button class="tab-btn" onclick="showTab('injury-replace')">🔄 Injury Replacements</button>
-  <button class="tab-btn" onclick="showTab('readme')">ℹ️ Rules</button>
+  <button class="tab-btn" onclick="showTab('il')">🏥 IL</button>
 </div>
 
 <div class="content">
@@ -678,7 +678,7 @@ function filterBlocks(containerId, query) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-loadTab('standings');
+loadTab('readme');
 </script>
 </body>
 </html>
