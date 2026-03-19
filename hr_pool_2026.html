@@ -622,6 +622,12 @@ async function loadMonthly() {
       if (skipExact.includes(team.toLowerCase())) continue;
       if (team.toLowerCase().startsWith('last updated')) continue;
       if (team.toLowerCase().startsWith('once data')) continue;
+      // Skip timestamp rows - contain "at" and "pm" or "am" or year like 2026
+      if (team.match(/\d{4}\s+at\s+\d/i)) continue;
+      if (team.match(/^\d{4}\s/) && team.toLowerCase().includes('pm')) continue;
+      // Skip if place column contains a month name (timestamp row)
+      const place = (r[1] || '').trim();
+      if (place.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i) && team.match(/\d{4}/)) continue;
       // Skip #N/A rows
       if (team === '#N/A' || total === '#N/A') continue;
       const tr = document.createElement('tr');
