@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 MLB Home Run Pool — NicksSportsPools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #0b1929; color: #e8f0f7; min-height: 100vh; }
+
+  /* HEADER */
+  .site-header { background: #0b1929; border-bottom: 2px solid #d4451e; padding: 12px 20px; display: flex; align-items: center; gap: 14px; }
+  .site-header .ball { font-size: 28px; }
+  .site-header h1 { font-size: 20px; font-weight: bold; color: #fff; line-height: 1.2; }
+  .site-header p { font-size: 12px; color: #8fb3d4; margin-top: 2px; }
+  .site-header a { color: #8fb3d4; text-decoration: none; font-size: 12px; margin-left: auto; white-space: nowrap; }
+  .site-header a:hover { color: #fff; }
+
+  /* TABS */
+  .tab-bar { background: #0f2236; border-bottom: 1px solid #1e3a5f; display: flex; overflow-x: auto; padding: 0 12px; gap: 2px; }
+  .tab-bar::-webkit-scrollbar { height: 3px; }
+  .tab-bar::-webkit-scrollbar-thumb { background: #1e3a5f; }
+  .tab-btn { padding: 12px 16px; font-size: 13px; font-weight: bold; color: #8fb3d4; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em; transition: all 0.15s; }
+  .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+  .tab-btn.active { color: #fff; border-bottom-color: #d4451e; }
+
+  /* CONTENT AREA */
+  .content { padding: 16px; max-width: 1100px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 40px; color: #8fb3d4; font-size: 14px; }
+  .loading::after { content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #8fb3d4; border-top-color: #d4451e; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { background: #2a0a0a; border: 1px solid #a32d2d; color: #f09595; padding: 12px 16px; border-radius: 6px; font-size: 13px; margin: 16px 0; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #1e3a5f; margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #0f2236; color: #8fb3d4; text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1e3a5f; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #0f2236; transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #0f2236; }
+  tbody td { padding: 8px 12px; color: #e8f0f7; vertical-align: middle; }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+  tbody tr:nth-child(even):hover { background: #0f2236; }
+
+  /* RANK */
+  .rank-cell { font-weight: bold; color: #8fb3d4; width: 36px; text-align: center; }
+  .rank-1 { color: #FFD700; }
+  .rank-2 { color: #C0C0C0; }
+  .rank-3 { color: #cd7f32; }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 10px; }
+  .badge-il { background: #3a0a0a; color: #f09595; border: 1px solid #a32d2d; }
+  .badge-active { background: #0a2a0a; color: #97c459; border: 1px solid #3b6d11; }
+  .badge-day { background: #2a1a00; color: #ef9f27; border: 1px solid #854f0b; }
+
+  /* SEARCH / FILTER ROW */
+  .filter-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .filter-row input, .filter-row select { background: #0f2236; border: 1px solid #1e3a5f; color: #e8f0f7; padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; }
+  .filter-row input { flex: 1; min-width: 160px; }
+  .filter-row input::placeholder { color: #4a6a8a; }
+  .filter-row select { cursor: pointer; }
+  .filter-row select option { background: #0f2236; }
+
+  /* TEAM SECTION CARDS (Master Roster / Individual Roster) */
+  .team-block { background: #0f2236; border: 1px solid #1e3a5f; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+  .team-block-header { background: #132b44; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a5f; cursor: pointer; }
+  .team-block-header .team-title { font-size: 14px; font-weight: bold; color: #fff; }
+  .team-block-header .team-meta { font-size: 12px; color: #8fb3d4; }
+  .team-block-header .team-hrs { font-size: 20px; font-weight: bold; color: #d4451e; }
+  .team-block-body { padding: 0; }
+  .team-block-body table { font-size: 13px; }
+  .team-block-body thead th { background: #0a1e33; }
+
+  /* STAT NUMBER */
+  .num { font-weight: bold; text-align: right; }
+  .hr-num { font-weight: bold; color: #d4451e; text-align: right; }
+
+  /* README */
+  .readme-wrap { background: #0f2236; border: 1px solid #1e3a5f; border-radius: 8px; padding: 20px; line-height: 1.7; font-size: 14px; color: #c8d8e8; }
+  .readme-wrap table { margin-top: 10px; }
+
+  /* UPDATED FOOTER */
+  .updated { font-size: 11px; color: #4a6a8a; text-align: right; margin-top: 8px; }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-title span { font-size: 12px; color: #8fb3d4; font-weight: normal; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .site-header h1 { font-size: 15px; }
+    .tab-btn { padding: 10px 11px; font-size: 11px; }
+    .content { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="ball">⚾</div>
+  <div>
+    <h1>21st Annual MLB Home Run Pool — 2026</h1>
+    <p>NicksSportsPools.com &nbsp;·&nbsp; Season opens March 25, 2026</p>
+  </div>
+  <a href="https://www.nickssportspools.com" target="_blank">↗ NicksSportsPools.com</a>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('standings')">🏆 Season Standings</button>
+  <button class="tab-btn" onclick="showTab('monthly')">📅 Monthly</button>
+  <button class="tab-btn" onclick="showTab('master')">📋 Master Roster</button>
+  <button class="tab-btn" onclick="showTab('individual')">🔍 Individual Roster</button>
+  <button class="tab-btn" onclick="showTab('mlbstats')">📊 MLB Player Stats</button>
+  <button class="tab-btn" onclick="showTab('hrstats')">💥 HR Derby Stats</button>
+  <button class="tab-btn" onclick="showTab('il')">🏥 Injured List</button>
+  <button class="tab-btn" onclick="showTab('injury-replace')">🔄 Injury Replacements</button>
+  <button class="tab-btn" onclick="showTab('readme')">ℹ️ Rules</button>
+</div>
+
+<div class="content">
+
+  <!-- SEASON STANDINGS -->
+  <div id="standings" class="section active">
+    <div class="section-title">Season Standings <span id="standings-count"></span></div>
+    <div class="filter-row">
+      <input type="text" id="standings-search" placeholder="Search team or owner..." oninput="filterTable('standings-table', this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table id="standings-table">
+        <thead><tr id="standings-head"></tr></thead>
+        <tbody id="standings-body"><tr><td colspan="10" class="loading">Loading standings</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="standings-updated"></p>
+  </div>
+
+  <!-- MONTHLY STANDINGS -->
+  <div id="monthly" class="section">
+    <div class="section-title">Monthly Standings</div>
+    <div class="table-wrap">
+      <table id="monthly-table">
+        <thead><tr id="monthly-head"></tr></thead>
+        <tbody id="monthly-body"><tr><td colspan="10" class="loading">Loading monthly standings</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="monthly-updated"></p>
+  </div>
+
+  <!-- MASTER ROSTER -->
+  <div id="master" class="section">
+    <div class="section-title">Master Roster <span id="master-count"></span></div>
+    <div class="filter-row">
+      <input type="text" id="master-search" placeholder="Search team, owner, or player..." oninput="filterBlocks('master-blocks', this.value)" />
+    </div>
+    <div id="master-blocks"><div class="loading">Loading rosters</div></div>
+    <p class="updated" id="master-updated"></p>
+  </div>
+
+  <!-- INDIVIDUAL ROSTER -->
+  <div id="individual" class="section">
+    <div class="section-title">Individual Roster Lookup</div>
+    <div class="filter-row">
+      <select id="individual-select" onchange="showIndividualTeam(this.value)">
+        <option value="">— Select a team —</option>
+      </select>
+    </div>
+    <div id="individual-display"><p style="color:#8fb3d4;font-size:13px;padding:20px 0;">Select a team above to view their roster.</p></div>
+    <p class="updated" id="individual-updated"></p>
+  </div>
+
+  <!-- MLB PLAYER STATS -->
+  <div id="mlbstats" class="section">
+    <div class="section-title">MLB Player Stats</div>
+    <div class="filter-row">
+      <input type="text" id="mlb-search" placeholder="Search player or team..." oninput="filterTable('mlb-table', this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table id="mlb-table">
+        <thead><tr id="mlb-head"></tr></thead>
+        <tbody id="mlb-body"><tr><td colspan="10" class="loading">Loading player stats</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="mlb-updated"></p>
+  </div>
+
+  <!-- HR DERBY STATS -->
+  <div id="hrstats" class="section">
+    <div class="section-title">HR Derby Player Stats</div>
+    <div class="filter-row">
+      <input type="text" id="hr-search" placeholder="Search player..." oninput="filterTable('hr-table', this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table id="hr-table">
+        <thead><tr id="hr-head"></tr></thead>
+        <tbody id="hr-body"><tr><td colspan="10" class="loading">Loading HR derby stats</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="hr-updated"></p>
+  </div>
+
+  <!-- INJURED LIST -->
+  <div id="il" class="section">
+    <div class="section-title">Injured List <span id="il-count"></span></div>
+    <div class="filter-row">
+      <input type="text" id="il-search" placeholder="Search player, team, or injury..." oninput="filterTable('il-table', this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table id="il-table">
+        <thead><tr id="il-head"></tr></thead>
+        <tbody id="il-body"><tr><td colspan="10" class="loading">Loading injured list</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="il-updated"></p>
+  </div>
+
+  <!-- INJURY REPLACEMENTS -->
+  <div id="injury-replace" class="section">
+    <div class="section-title">Player List — Injury Replacements</div>
+    <div class="filter-row">
+      <input type="text" id="ir-search" placeholder="Search player..." oninput="filterTable('ir-table', this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table id="ir-table">
+        <thead><tr id="ir-head"></tr></thead>
+        <tbody id="ir-body"><tr><td colspan="10" class="loading">Loading replacement list</td></tr></tbody>
+      </table>
+    </div>
+    <p class="updated" id="ir-updated"></p>
+  </div>
+
+  <!-- README / RULES -->
+  <div id="readme" class="section">
+    <div class="section-title">Pool Rules & Info</div>
+    <div class="readme-wrap" id="readme-content"><div class="loading">Loading rules</div></div>
+    <p class="updated" id="readme-updated"></p>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTyRkmNCzLEUgsYrNiDgjz9xL0KH8_FybCTpsOYvIE4W9tc4WeScNatL_iHuOoQLd6RScuR_x4Srdv3/pub?single=true&output=csv&gid=';
+const GIDS = {
+  readme:        '2137655048',
+  master:        '2005646421',
+  individual:    '1358422583',
+  standings:     '141714902',
+  monthly:       '1464702976',
+  hrstats:       '955663895',
+  mlbstats:      '792984737',
+  irlist:        '634116388',
+  il:            '884895454'
+};
+
+const cache = {};
+const loaded = {};
+
+async function fetchCSV(gid) {
+  if (cache[gid]) return cache[gid];
+  const url = BASE + gid;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  const rows = parseCSV(text);
+  cache[gid] = rows;
+  return rows;
+}
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split('\n');
+  for (let line of lines) {
+    if (!line.trim()) continue;
+    const cols = [];
+    let inQ = false, cell = '';
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cell.trim()); cell = ''; }
+      else { cell += c; }
+    }
+    cols.push(cell.trim());
+    rows.push(cols);
+  }
+  return rows;
+}
+
+function now() {
+  return new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  loadTab(id);
+}
+
+function loadTab(id) {
+  if (loaded[id]) return;
+  loaded[id] = true;
+  switch(id) {
+    case 'standings':     loadStandings(); break;
+    case 'monthly':       loadGenericTable('monthly',  GIDS.monthly,  'monthly-head',  'monthly-body',  'monthly-updated'); break;
+    case 'master':        loadRosterBlocks(); break;
+    case 'individual':    loadIndividualRoster(); break;
+    case 'mlbstats':      loadGenericTable('mlbstats', GIDS.mlbstats, 'mlb-head',      'mlb-body',      'mlb-updated'); break;
+    case 'hrstats':       loadGenericTable('hrstats',  GIDS.hrstats,  'hr-head',       'hr-body',       'hr-updated'); break;
+    case 'il':            loadIL(); break;
+    case 'injury-replace':loadGenericTable('irlist',   GIDS.irlist,   'ir-head',       'ir-body',       'ir-updated'); break;
+    case 'readme':        loadReadme(); break;
+  }
+}
+
+// ── STANDINGS ──────────────────────────────────────────────
+async function loadStandings() {
+  try {
+    const rows = await fetchCSV(GIDS.standings);
+    if (!rows.length) throw new Error('No data');
+    const head = document.getElementById('standings-head');
+    const body = document.getElementById('standings-body');
+    const headers = rows[0];
+    head.innerHTML = '<th class="rank-cell">#</th>' + headers.map(h => `<th>${h}</th>`).join('');
+    body.innerHTML = '';
+    let rank = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (r.every(c => !c)) continue;
+      rank++;
+      const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-cell';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="rank-cell ${rankClass}">${rank}</td>` +
+        r.map((c, ci) => {
+          const isNum = !isNaN(c) && c !== '';
+          return `<td class="${isNum && ci > 0 ? 'num' : ''}">${c}</td>`;
+        }).join('');
+      body.appendChild(tr);
+    }
+    document.getElementById('standings-count').textContent = `· ${rank} teams`;
+    document.getElementById('standings-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById('standings-body').innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load standings. ${e.message}</div></td></tr>`;
+  }
+}
+
+// ── GENERIC TABLE ──────────────────────────────────────────
+async function loadGenericTable(gidKey, gid, headId, bodyId, updatedId) {
+  try {
+    const rows = await fetchCSV(gid);
+    if (!rows.length) throw new Error('No data');
+    const head = document.getElementById(headId);
+    const body = document.getElementById(bodyId);
+    head.innerHTML = rows[0].map(h => `<th>${h}</th>`).join('');
+    body.innerHTML = '';
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (r.every(c => !c)) continue;
+      const tr = document.createElement('tr');
+      tr.innerHTML = r.map(c => `<td>${c}</td>`).join('');
+      body.appendChild(tr);
+    }
+    document.getElementById(updatedId).textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById(bodyId).innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load data. ${e.message}</div></td></tr>`;
+  }
+}
+
+// ── MASTER ROSTER BLOCKS ────────────────────────────────────
+async function loadRosterBlocks() {
+  const container = document.getElementById('master-blocks');
+  try {
+    const rows = await fetchCSV(GIDS.master);
+    if (!rows.length) throw new Error('No data');
+    const blocks = parseTeamBlocks(rows);
+    document.getElementById('master-count').textContent = `· ${blocks.length} teams`;
+    container.innerHTML = '';
+    for (const block of blocks) {
+      container.appendChild(buildTeamBlock(block));
+    }
+    document.getElementById('master-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    container.innerHTML = `<div class="error-msg">Could not load rosters. ${e.message}</div>`;
+  }
+}
+
+function parseTeamBlocks(rows) {
+  const blocks = [];
+  let current = null;
+  let headerRow = null;
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const first = r[0] ? r[0].trim() : '';
+    const nonEmpty = r.filter(c => c.trim()).length;
+    // Detect team header row: typically has team name in col A, few populated cells
+    // A player data row usually has rank (number) in col A OR player name
+    const looksLikeHeader = nonEmpty <= 4 && first && isNaN(first) && !first.toLowerCase().includes('rank') && !first.toLowerCase().includes('player');
+    if (looksLikeHeader && (i === 0 || rows[i-1].every(c => !c.trim()) || current)) {
+      if (current) blocks.push(current);
+      current = { title: first, meta: r.slice(1).filter(c=>c).join(' · '), players: [], headers: [] };
+    } else if (current && first.toLowerCase() === 'rank' || (current && r.some(c => c.toLowerCase && c.toLowerCase() === 'player'))) {
+      current.headers = r;
+    } else if (current && first && !r.every(c => !c.trim())) {
+      current.players.push(r);
+    }
+  }
+  if (current) blocks.push(current);
+  return blocks;
+}
+
+function buildTeamBlock(block) {
+  const div = document.createElement('div');
+  div.className = 'team-block';
+  div.dataset.search = (block.title + ' ' + block.meta + ' ' + block.players.map(p=>p.join(' ')).join(' ')).toLowerCase();
+  const totalHR = block.players.reduce((sum, p) => {
+    const n = parseInt(p[2]) || 0; return sum + n;
+  }, 0);
+  div.innerHTML = `
+    <div class="team-block-header" onclick="toggleBlock(this)">
+      <div>
+        <div class="team-title">${block.title}</div>
+        <div class="team-meta">${block.meta || ''}</div>
+      </div>
+      <div class="team-hrs">${totalHR > 0 ? totalHR + ' HR' : ''}</div>
+    </div>
+    <div class="team-block-body">
+      <div class="table-wrap" style="border:none;border-radius:0;">
+        <table>
+          ${block.headers.length ? '<thead><tr>' + block.headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead>' : ''}
+          <tbody>
+            ${block.players.map(p => '<tr>' + p.map((c,ci) => {
+              let cls = '';
+              if (ci === 2 && !isNaN(c) && c !== '') cls = 'hr-num';
+              if (c === 'IL' || c === 'IL-10' || c === 'IL-15' || c === 'IL-60') c = `<span class="badge badge-il">${c}</span>`;
+              else if (c === 'DTD') c = `<span class="badge badge-day">${c}</span>`;
+              return `<td class="${cls}">${c}</td>`;
+            }).join('') + '</tr>').join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  return div;
+}
+
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+// ── INDIVIDUAL ROSTER ────────────────────────────────────────
+let individualData = null;
+async function loadIndividualRoster() {
+  try {
+    const rows = await fetchCSV(GIDS.individual);
+    individualData = parseTeamBlocks(rows);
+    const sel = document.getElementById('individual-select');
+    individualData.forEach((b, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = b.title;
+      sel.appendChild(opt);
+    });
+    document.getElementById('individual-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById('individual-display').innerHTML = `<div class="error-msg">Could not load roster data. ${e.message}</div>`;
+  }
+}
+
+function showIndividualTeam(idx) {
+  const display = document.getElementById('individual-display');
+  if (!idx || !individualData) { display.innerHTML = '<p style="color:#8fb3d4;font-size:13px;padding:20px 0;">Select a team above to view their roster.</p>'; return; }
+  const block = individualData[idx];
+  const el = buildTeamBlock(block);
+  // Expand by default
+  el.querySelector('.team-block-body').style.display = '';
+  display.innerHTML = '';
+  display.appendChild(el);
+}
+
+// ── IL ────────────────────────────────────────────────────────
+async function loadIL() {
+  try {
+    const rows = await fetchCSV(GIDS.il);
+    if (!rows.length) throw new Error('No data');
+    const head = document.getElementById('il-head');
+    const body = document.getElementById('il-body');
+    head.innerHTML = rows[0].map(h => `<th>${h}</th>`).join('');
+    body.innerHTML = '';
+    let count = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (r.every(c => !c)) continue;
+      count++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = r.map((c, ci) => {
+        let val = c;
+        if (c === 'IL-10' || c === 'IL-15' || c === 'IL-60' || c === 'IL') val = `<span class="badge badge-il">${c}</span>`;
+        else if (c === 'DTD') val = `<span class="badge badge-day">${c}</span>`;
+        else if (c === 'Active') val = `<span class="badge badge-active">${c}</span>`;
+        return `<td>${val}</td>`;
+      }).join('');
+      body.appendChild(tr);
+    }
+    document.getElementById('il-count').textContent = `· ${count} players`;
+    document.getElementById('il-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    document.getElementById('il-body').innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load IL data. ${e.message}</div></td></tr>`;
+  }
+}
+
+// ── README ────────────────────────────────────────────────────
+async function loadReadme() {
+  const el = document.getElementById('readme-content');
+  try {
+    const rows = await fetchCSV(GIDS.readme);
+    el.innerHTML = rows.map(r => {
+      const line = r.join(' ').trim();
+      if (!line) return '<br>';
+      return `<p style="margin-bottom:6px">${line}</p>`;
+    }).join('');
+    document.getElementById('readme-updated').textContent = 'Updated: ' + now();
+  } catch(e) {
+    el.innerHTML = `<div class="error-msg">Could not load rules. ${e.message}</div>`;
+  }
+}
+
+// ── SEARCH / FILTER ───────────────────────────────────────────
+function filterTable(tableId, query) {
+  const q = query.toLowerCase();
+  const rows = document.getElementById(tableId).querySelectorAll('tbody tr');
+  rows.forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function filterBlocks(containerId, query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#' + containerId + ' .team-block').forEach(b => {
+    b.style.display = b.dataset.search.includes(q) ? '' : 'none';
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadTab('standings');
+</script>
+</body>
+</html>
