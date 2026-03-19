@@ -617,10 +617,11 @@ async function loadMonthly() {
       // Skip rows with no team name
       if (!team) continue;
       // Skip header/junk rows and timestamp rows
-      const skipWords = ['place','team name','total','march','monthly','last','updated','once','col','will show','how it','pm','am'];
-      if (skipWords.some(w => team.toLowerCase().includes(w))) continue;
-      // Skip timestamp rows (contain numbers and month names)
-      if (team.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i)) continue;
+      // Skip only exact header/junk matches
+      const skipExact = ['place','team name','total','march/april','may','june','july','august','sept','monthly standings','season standings'];
+      if (skipExact.includes(team.toLowerCase())) continue;
+      if (team.toLowerCase().startsWith('last updated')) continue;
+      if (team.toLowerCase().startsWith('once data')) continue;
       // Skip #N/A rows
       if (team === '#N/A' || total === '#N/A') continue;
       const tr = document.createElement('tr');
