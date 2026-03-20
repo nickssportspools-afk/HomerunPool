@@ -274,15 +274,28 @@ const SHEETS = {
 const cache = {};
 const loaded = {};
 
-async function fetchSheet(key) {
-  if (cache[key]) return cache[key];
-  const url = WEB_APP + '?sheet=' + encodeURIComponent(SHEETS[key]);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  cache[key] = data;
-  return data;
+function fetchSheet(key) {
+  if (cache[key]) return Promise.resolve(cache[key]);
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + key + '_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      reject(new Error('Timeout'));
+    }, 15000);
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      document.body.removeChild(script);
+      if (data.error) { reject(new Error(data.error)); return; }
+      cache[key] = data;
+      resolve(data);
+    };
+    script.src = WEB_APP + '?sheet=' + encodeURIComponent(SHEETS[key]) + '&callback=' + cbName;
+    script.onerror = () => { clearTimeout(timeout); reject(new Error('Script load failed')); };
+    document.body.appendChild(script);
+  });
 }
 
 function ts() {
