@@ -349,10 +349,10 @@ async function loadStandings() {
     body.innerHTML = '';
     let count = 0;
     for (const r of rows) {
-      const place = String(r[1]||'').trim();
-      const team  = String(r[2]||'').trim();
-      const total = String(r[3]||'').trim();
-      const back  = String(r[4]||'').trim();
+      const place = r[1] !== undefined ? String(r[1]).trim() : '';
+      const team  = r[2] !== undefined ? String(r[2]).trim() : '';
+      const total = r[3] !== undefined ? String(r[3]).trim() : '';
+      const back  = r[4] !== undefined ? String(r[4]).trim() : '';
       if (!team || isJunk(team)) continue;
       count++;
       const tr = document.createElement('tr');
@@ -374,15 +374,15 @@ async function loadMonthly() {
     const body = document.getElementById('monthly-body');
     body.innerHTML = '';
     for (const r of rows) {
-      const place = String(r[1]||'').trim();
-      const team  = String(r[2]||'').trim();
-      const total = String(r[3]||'').trim();
-      const mar   = String(r[4]||'').trim();
-      const may   = String(r[5]||'').trim();
-      const jun   = String(r[6]||'').trim();
-      const jul   = String(r[7]||'').trim();
-      const aug   = String(r[8]||'').trim();
-      const sep   = String(r[9]||'').trim();
+      const place = r[1] !== undefined ? String(r[1]).trim() : '';
+      const team  = r[2] !== undefined ? String(r[2]).trim() : '';
+      const total = r[3] !== undefined ? String(r[3]).trim() : '';
+      const mar   = r[4] !== undefined ? String(r[4]).trim() : '';
+      const may   = r[5] !== undefined ? String(r[5]).trim() : '';
+      const jun   = r[6] !== undefined ? String(r[6]).trim() : '';
+      const jul   = r[7] !== undefined ? String(r[7]).trim() : '';
+      const aug   = r[8] !== undefined ? String(r[8]).trim() : '';
+      const sep   = r[9] !== undefined ? String(r[9]).trim() : '';
       if (!team || isJunk(team)) continue;
       if (place.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s/i)) continue;
       const tr = document.createElement('tr');
@@ -421,12 +421,12 @@ function parseMaster(rows) {
   for (const r of rows) {
     const colA = String(r[0]||'').trim();
     const colB = String(r[1]||'').trim();
-    const colC = String(r[2]||'').trim();
-    const colD = String(r[3]||'').trim();
-    const colE = String(r[4]||'').trim();
-    const colF = String(r[5]||'').trim();
-    const colG = String(r[6]||'').trim();
-    const colH = String(r[7]||'').trim();
+    const colC = r[2] !== undefined && r[2] !== '' ? String(r[2]).trim() : '';
+    const colD = r[3] !== undefined ? String(r[3]).trim() : '';
+    const colE = r[4] !== undefined ? String(r[4]).trim() : '';
+    const colF = r[5] !== undefined ? String(r[5]).trim() : '';
+    const colG = r[6] !== undefined ? String(r[6]).trim() : '';
+    const colH = r[7] !== undefined ? String(r[7]).trim() : '';
     if (colA === '# Teams' || colB === 'ENTRY NAME') continue;
     if (colB.toUpperCase() === 'TOTALS') continue;
     if (colA && !isNaN(colA) && colA !== '') {
@@ -460,10 +460,10 @@ function renderBlocks(blocks, container) {
       </div>
       <div class="team-block-body">
         <table>
-          <thead><tr><th>Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
+          <thead><tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
           <tbody>
             ${block.players.map(p => `<tr>
-              <td class="center">${p[0]}</td>
+              <td class="center">${p[0] !== '' ? p[0] : ''}</td>
               <td>${p[1]}</td>
               <td>${p[2]}</td>
               <td class="hr-num">${p[3]}</td>
@@ -509,10 +509,10 @@ function showIndividualTeam(idx) {
       </div>
       <div class="team-block-body">
         <table>
-          <thead><tr><th>Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
+          <thead><tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
           <tbody>
             ${block.players.map(p => `<tr>
-              <td class="center">${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td>
+              <td class="center">${p[0] !== '' ? p[0] : ''}</td><td>${p[1]}</td><td>${p[2]}</td>
               <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
               <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
             </tr>`).join('')}
