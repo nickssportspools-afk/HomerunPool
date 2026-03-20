@@ -389,7 +389,7 @@ async function loadStandings() {
       if (team === '#N/A') continue;
       count++;
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${place}</td><td>${team}</td><td class="num">${total}</td><td class="num">${back}</td>`;
+      tr.innerHTML = `<td>${place}</td><td>${team}</td><td style="text-align:center">${total}</td><td style="text-align:center">${back}</td>`;
       body.appendChild(tr);
     }
     document.getElementById('standings-count').textContent = '· ' + count + ' teams';
@@ -423,7 +423,7 @@ async function loadMonthly() {
       // Extra check: skip if place looks like a date fragment
       if (place.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s/i)) continue;
       const tr = document.createElement('tr');
-      tr.innerHTML = [place,team,total,mar,may,jun,jul,aug,sep].map(c=>`<td>${c}</td>`).join('');
+      tr.innerHTML = [place,team,total,mar,may,jun,jul,aug,sep].map((c,i)=>`<td style="${i>=2?'text-align:center':''}">${c}</td>`).join('');
       body.appendChild(tr);
     }
     document.getElementById('monthly-updated').textContent = 'Updated: ' + ts();
