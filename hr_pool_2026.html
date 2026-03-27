@@ -516,14 +516,18 @@ function showIndividualTeam(idx) {
     <div class="team-block">
       <div class="team-block-header">
         <div class="team-title">${block.name}</div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;">
-          <div style="font-size:10px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;">Top 7 HRs</div>
-          <div class="team-hrs">${top7HR}</div>
-        </div>
       </div>
       <div class="team-block-body">
         <table>
-          <thead><tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
+          <thead>
+            <tr style="background:#0d2540;">
+              <td class="center" colspan="2" style="padding:8px 12px;font-size:11px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;font-weight:bold;">Top 7 Total</td>
+              <td class="center" colspan="1" style="padding:8px 12px;"></td>
+              <td class="center" style="padding:8px 12px;font-size:18px;font-weight:bold;color:#d4451e;">${top7HR}</td>
+              <td colspan="2"></td>
+            </tr>
+            <tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr>
+          </thead>
           <tbody>
             ${block.players.map(p => {
               const rank = parseInt(p[4]);
