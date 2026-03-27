@@ -340,8 +340,6 @@ function loadTab(id) {
 }
 
 // SEASON STANDINGS
-// Rows: 1=Last Updated, 2=SEASON STANDINGS, 3=PLACE/TEAM NAME headers, 4+=data
-// Cols: A=empty, B=place, C=team name, D=total, E=hrs back
 async function loadStandings() {
   try {
     const rows = await fetchSheet('standings');
@@ -367,7 +365,6 @@ async function loadStandings() {
 }
 
 // MONTHLY STANDINGS
-// Cols: A=empty, B=place, C=team name, D=total, E=march/april, F=may, G=june, H=july, I=aug, J=sept
 async function loadMonthly() {
   try {
     const rows = await fetchSheet('monthly');
@@ -396,8 +393,6 @@ async function loadMonthly() {
 }
 
 // MASTER ROSTER
-// Col A=team# (merged), Col B=team name (merged - appears on last row of merge in CSV, but Apps Script returns actual value on first row)
-// Col C=weighted HRs, Col D=player, Col E=MLB team, Col F=2026 HRs, Col G=rank, Col H=IL
 let masterBlocks = [];
 
 async function loadMaster() {
@@ -452,24 +447,33 @@ function renderBlocks(blocks, container) {
     const div = document.createElement('div');
     div.className = 'team-block';
     div.dataset.search = (block.name + ' ' + block.players.map(p=>p.join(' ')).join(' ')).toLowerCase();
-    const totalHR = block.players.reduce((s,p) => s + (parseInt(p[3])||0), 0);
+    const top7HR = block.players
+      .filter(p => { const r = parseInt(p[4]); return r >= 1 && r <= 7; })
+      .reduce((s,p) => s + (parseInt(p[3])||0), 0);
     div.innerHTML = `
       <div class="team-block-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
         <div class="team-title">${block.name}</div>
-        <div class="team-hrs">${totalHR > 0 ? totalHR + ' HR' : ''}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;">
+          <div style="font-size:10px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;">Top 7 HRs</div>
+          <div class="team-hrs">${top7HR}</div>
+        </div>
       </div>
       <div class="team-block-body">
         <table>
           <thead><tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
           <tbody>
-            ${block.players.map(p => `<tr>
-              <td class="center">${p[0] !== '' ? p[0] : ''}</td>
-              <td>${p[1]}</td>
-              <td>${p[2]}</td>
-              <td class="hr-num">${p[3]}</td>
-              <td class="center">${p[4]}</td>
-              <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
-            </tr>`).join('')}
+            ${block.players.map(p => {
+              const rank = parseInt(p[4]);
+              const isTop7 = rank >= 1 && rank <= 7;
+              return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
+                <td class="center">${p[0] !== '' ? p[0] : ''}</td>
+                <td>${p[1]}</td>
+                <td>${p[2]}</td>
+                <td class="hr-num">${p[3]}</td>
+                <td class="center">${p[4]}</td>
+                <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>`;
@@ -502,20 +506,34 @@ function showIndividualTeam(idx) {
   const sel = document.getElementById('individual-select');
   if (!idx || !sel._blocks) { display.innerHTML = '<p style="color:#8fb3d4;font-size:13px;padding:20px 0;">Select a team above.</p>'; return; }
   const block = sel._blocks[idx];
+
+  // Calculate Top 7 HRs (players with rank 1-7)
+  const top7HR = block.players
+    .filter(p => { const r = parseInt(p[4]); return r >= 1 && r <= 7; })
+    .reduce((sum, p) => sum + (parseInt(p[3]) || 0), 0);
+
   display.innerHTML = `
     <div class="team-block">
       <div class="team-block-header">
         <div class="team-title">${block.name}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;">
+          <div style="font-size:10px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;">Top 7 HRs</div>
+          <div class="team-hrs">${top7HR}</div>
+        </div>
       </div>
       <div class="team-block-body">
         <table>
           <thead><tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr></thead>
           <tbody>
-            ${block.players.map(p => `<tr>
-              <td class="center">${p[0] !== '' ? p[0] : ''}</td><td>${p[1]}</td><td>${p[2]}</td>
-              <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
-              <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
-            </tr>`).join('')}
+            ${block.players.map(p => {
+              const rank = parseInt(p[4]);
+              const isTop7 = rank >= 1 && rank <= 7;
+              return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
+                <td class="center">${p[0] !== '' ? p[0] : ''}</td><td>${p[1]}</td><td>${p[2]}</td>
+                <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
+                <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>
