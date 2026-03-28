@@ -27,8 +27,11 @@ body { font-family: Arial, sans-serif; background: #0b1929; color: #e8f0f7; min-
 .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 70vh; border-radius: 8px; border: 1px solid #1e3a5f; margin-top: 8px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead { position: sticky; top: 0; z-index: 2; }
-thead th { background: #0f2236; color: #8fb3d4; text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1e3a5f; white-space: nowrap; }
+thead th { background: #0f2236; color: #8fb3d4; text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1e3a5f; white-space: nowrap; cursor: pointer; user-select: none; }
+thead th:hover { color: #fff; background: #1a3550; }
 thead th.center { text-align: center; }
+thead th.sort-asc::after { content: ' ▲'; color: #d4451e; font-size: 10px; }
+thead th.sort-desc::after { content: ' ▼'; color: #d4451e; font-size: 10px; }
 tbody tr { border-bottom: 1px solid #0f2236; transition: background 0.1s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #0f2236; }
@@ -122,11 +125,11 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
         </tr>
         <tr style="border-bottom:1px solid #1e3a5f;background:rgba(255,255,255,0.02);">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">6. MLB Player Stats</td>
-          <td style="padding:8px 12px;color:#c8d8e8;">Daily updated HR totals and changes for all players (updated from external source).</td>
+          <td style="padding:8px 12px;color:#c8d8e8;">Daily updated HR totals for all players.</td>
         </tr>
         <tr style="border-bottom:1px solid #1e3a5f;">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">7. Player List - Injury Replacement</td>
-          <td style="padding:8px 12px;color:#c8d8e8;">Original list of players to pick from with their Weighted Totals for injury replacements (60-Day IL &amp; Out for Season).</td>
+          <td style="padding:8px 12px;color:#c8d8e8;">Original list of players with Weighted Totals for injury replacements (60-Day IL &amp; Out for Season).</td>
         </tr>
         <tr style="background:rgba(255,255,255,0.02);">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">8. IL</td>
@@ -137,15 +140,19 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <tr style="border-bottom:1px solid #1e3a5f;">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;width:35%;">• Top 7 Players Highlighted</td>
-          <td style="padding:8px 12px;color:#c8d8e8;">Top ranked players are <strong>BOLD</strong> and <strong>Highlighted</strong> in Individual Rosters.</td>
+          <td style="padding:8px 12px;color:#c8d8e8;">Top ranked players are <strong>BOLD</strong> in Individual Rosters.</td>
         </tr>
         <tr style="border-bottom:1px solid #1e3a5f;background:rgba(255,255,255,0.02);">
+          <td style="padding:8px 12px;color:#fff;font-weight:bold;">• Sortable Columns</td>
+          <td style="padding:8px 12px;color:#c8d8e8;">Click any column header to sort ascending or descending.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e3a5f;">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">• Injury Alerts</td>
-          <td style="padding:8px 12px;color:#c8d8e8;"><strong style="color:#97c459;">60-DAY &amp; OUT FOR SEASON</strong> injured players highlighted in <strong style="color:#97c459;">GREEN</strong>.</td>
+          <td style="padding:8px 12px;color:#c8d8e8;"><strong style="color:#97c459;">60-DAY &amp; OUT FOR SEASON</strong> players highlighted in <strong style="color:#97c459;">GREEN</strong>.</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">• Auto-Ranking</td>
-          <td style="padding:8px 12px;color:#c8d8e8;">Rankings update automatically as the stats update.</td>
+          <td style="padding:8px 12px;color:#c8d8e8;">Rankings update automatically as stats update.</td>
         </tr>
       </table>
     </div>
@@ -179,7 +186,10 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     <div class="table-wrap">
       <table id="standings-table">
         <thead><tr>
-          <th class="center">Place</th><th>Team Name</th><th class="center">Total</th><th class="center">HRs Back</th>
+          <th class="center" onclick="sortTable('standings-table',0,this)">Place</th>
+          <th onclick="sortTable('standings-table',1,this)">Team Name</th>
+          <th class="center" onclick="sortTable('standings-table',2,this)">Total</th>
+          <th class="center" onclick="sortTable('standings-table',3,this)">HRs Back</th>
         </tr></thead>
         <tbody id="standings-body"><tr><td colspan="4" class="loading">Loading standings</td></tr></tbody>
       </table>
@@ -192,7 +202,15 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     <div class="table-wrap">
       <table id="monthly-table">
         <thead><tr>
-          <th class="center">Place</th><th>Team Name</th><th class="center">Total</th><th class="center">March/April</th><th class="center">May</th><th class="center">June</th><th class="center">July</th><th class="center">August</th><th class="center">Sept</th>
+          <th class="center" onclick="sortTable('monthly-table',0,this)">Place</th>
+          <th onclick="sortTable('monthly-table',1,this)">Team Name</th>
+          <th class="center" onclick="sortTable('monthly-table',2,this)">Total</th>
+          <th class="center" onclick="sortTable('monthly-table',3,this)">March/April</th>
+          <th class="center" onclick="sortTable('monthly-table',4,this)">May</th>
+          <th class="center" onclick="sortTable('monthly-table',5,this)">June</th>
+          <th class="center" onclick="sortTable('monthly-table',6,this)">July</th>
+          <th class="center" onclick="sortTable('monthly-table',7,this)">August</th>
+          <th class="center" onclick="sortTable('monthly-table',8,this)">Sept</th>
         </tr></thead>
         <tbody id="monthly-body"><tr><td colspan="9" class="loading">Loading monthly standings</td></tr></tbody>
       </table>
@@ -261,7 +279,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
 <script>
 const WEB_APP = 'https://script.google.com/macros/s/AKfycbyvj-eeJbwMoTd15kgS3oH0IE1Nei1Trn2Ogl0CLG4iyxa4jXT3o2qt3TTwF0bYBF3K/exec';
 const SHEETS = {
-  readme:   'READ ME',
   master:   'Main Rosters',
   standings:'Season Standings',
   monthly:  'Monthly Standings',
@@ -273,6 +290,7 @@ const SHEETS = {
 
 const cache = {};
 const loaded = {};
+const tableSortState = {};
 
 function fetchSheet(key) {
   if (cache[key]) return Promise.resolve(cache[key]);
@@ -328,71 +346,125 @@ function showTab(id, btn) {
 
 function loadTab(id) {
   switch(id) {
-    case 'master':    loadMaster(); break;
-    case 'individual':loadIndividual(); break;
-    case 'standings': loadStandings(); break;
-    case 'monthly':   loadMonthly(); break;
-    case 'hrstats':   loadGeneric('hrstats','hr-head','hr-body','hr-updated'); break;
-    case 'mlbstats':  loadGeneric('mlbstats','mlb-head','mlb-body','mlb-updated'); break;
-    case 'injury-replace': loadGeneric('irlist','ir-head','ir-body','ir-updated'); break;
-    case 'il':        loadIL(); break;
+    case 'master':         loadMaster(); break;
+    case 'individual':     loadIndividual(); break;
+    case 'standings':      loadStandings(); break;
+    case 'monthly':        loadMonthly(); break;
+    case 'hrstats':        loadGeneric('hrstats','hr-head','hr-body','hr-updated','hr-table'); break;
+    case 'mlbstats':       loadGeneric('mlbstats','mlb-head','mlb-body','mlb-updated','mlb-table'); break;
+    case 'injury-replace': loadGeneric('irlist','ir-head','ir-body','ir-updated','ir-table'); break;
+    case 'il':             loadIL(); break;
   }
 }
 
-// SEASON STANDINGS
+// ── SORTABLE TABLE ────────────────────────────────────────────────────────────
+function sortTable(tableId, colIdx, thEl) {
+  const table = document.getElementById(tableId);
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const state = tableSortState[tableId] || {};
+  const asc = (state.col === colIdx) ? !state.asc : true;
+  tableSortState[tableId] = { col: colIdx, asc };
+
+  table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  thEl.classList.add(asc ? 'sort-asc' : 'sort-desc');
+
+  rows.sort((a, b) => {
+    const aCells = a.querySelectorAll('td');
+    const bCells = b.querySelectorAll('td');
+    if (!aCells[colIdx] || !bCells[colIdx]) return 0;
+    const aText = aCells[colIdx].textContent.trim();
+    const bText = bCells[colIdx].textContent.trim();
+    const aNum = parseFloat(aText);
+    const bNum = parseFloat(bText);
+    if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+    return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ── SEASON STANDINGS (sorted client-side) ─────────────────────────────────────
 async function loadStandings() {
   try {
     const rows = await fetchSheet('standings');
     const body = document.getElementById('standings-body');
     body.innerHTML = '';
-    let count = 0;
+    const data = [];
     for (const r of rows) {
-      const place = r[1] !== undefined ? String(r[1]).trim() : '';
       const team  = r[2] !== undefined ? String(r[2]).trim() : '';
-      const total = r[3] !== undefined && r[3] !== '' ? String(r[3]) : '';
-      const back  = r[4] !== undefined && r[4] !== '' ? String(r[4]) : '';
+      const total = r[3] !== undefined && r[3] !== '' ? r[3] : 0;
+      const back  = r[4] !== undefined && r[4] !== '' ? r[4] : 0;
       if (!team || isJunk(team)) continue;
-      count++;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="center">${place}</td><td>${team}</td><td class="center">${total}</td><td class="center">${back}</td>`;
-      body.appendChild(tr);
+      data.push({ team, total: Number(total)||0, back: Number(back)||0 });
     }
-    document.getElementById('standings-count').textContent = '· ' + count + ' teams';
+
+    // Sort: Total DESC, Team Name ASC
+    data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
+
+    // Assign places accounting for ties
+    let place = 1;
+    for (let i = 0; i < data.length; i++) {
+      if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
+      data[i].place = place;
+    }
+
+    data.forEach(d => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.back}</td>`;
+      body.appendChild(tr);
+    });
+
+    document.getElementById('standings-count').textContent = '· ' + data.length + ' teams';
     document.getElementById('standings-updated').textContent = 'Updated: ' + ts();
   } catch(e) {
     document.getElementById('standings-body').innerHTML = `<tr><td colspan="4"><div class="error-msg">Could not load standings. ${e.message}</div></td></tr>`;
   }
 }
 
-// MONTHLY STANDINGS
+// ── MONTHLY STANDINGS (sorted client-side) ────────────────────────────────────
 async function loadMonthly() {
   try {
     const rows = await fetchSheet('monthly');
     const body = document.getElementById('monthly-body');
     body.innerHTML = '';
+    const data = [];
     for (const r of rows) {
-      const place = r[1] !== undefined ? String(r[1]).trim() : '';
-      const team  = r[2] !== undefined ? String(r[2]).trim() : '';
-      const total = r[3] !== undefined && r[3] !== '' ? String(r[3]) : '';
-      const mar   = (r[4] != null && r[4] !== '') ? String(r[4]) : '';
-      const may   = (r[5] != null && r[5] !== '') ? String(r[5]) : '';
-      const jun   = (r[6] != null && r[6] !== '') ? String(r[6]) : '';
-      const jul   = (r[7] != null && r[7] !== '') ? String(r[7]) : '';
-      const aug   = (r[8] != null && r[8] !== '') ? String(r[8]) : '';
-      const sep   = (r[9] != null && r[9] !== '') ? String(r[9]) : '';
+      const team = r[2] !== undefined ? String(r[2]).trim() : '';
+      const total = r[3] != null && r[3] !== '' ? r[3] : 0;
+      const mar = r[4] != null && r[4] !== '' ? r[4] : 0;
+      const may = r[5] != null && r[5] !== '' ? r[5] : 0;
+      const jun = r[6] != null && r[6] !== '' ? r[6] : 0;
+      const jul = r[7] != null && r[7] !== '' ? r[7] : 0;
+      const aug = r[8] != null && r[8] !== '' ? r[8] : 0;
+      const sep = r[9] != null && r[9] !== '' ? r[9] : 0;
       if (!team || isJunk(team)) continue;
-      if (place.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s/i)) continue;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="center">${place}</td><td>${team}</td><td class="center">${total}</td><td class="center">${mar}</td><td class="center">${may}</td><td class="center">${jun}</td><td class="center">${jul}</td><td class="center">${aug}</td><td class="center">${sep}</td>`;
-      body.appendChild(tr);
+      data.push({ team, total:Number(total)||0, mar:Number(mar)||0, may:Number(may)||0, jun:Number(jun)||0, jul:Number(jul)||0, aug:Number(aug)||0, sep:Number(sep)||0 });
     }
+
+    // Sort: Total DESC, Team Name ASC
+    data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
+
+    // Assign places accounting for ties
+    let place = 1;
+    for (let i = 0; i < data.length; i++) {
+      if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
+      data[i].place = place;
+    }
+
+    data.forEach(d => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center">${d.may}</td><td class="center">${d.jun}</td><td class="center">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
+      body.appendChild(tr);
+    });
+
     document.getElementById('monthly-updated').textContent = 'Updated: ' + ts();
   } catch(e) {
     document.getElementById('monthly-body').innerHTML = `<tr><td colspan="9"><div class="error-msg">Could not load monthly standings. ${e.message}</div></td></tr>`;
   }
 }
 
-// MASTER ROSTER
+// ── MASTER ROSTER ─────────────────────────────────────────────────────────────
 let masterBlocks = [];
 
 async function loadMaster() {
@@ -431,9 +503,7 @@ function parseMaster(rows) {
       else if (curName) teams[curNum].name = curName;
     }
     if (!curNum) continue;
-    if (!teams[curNum].name && colB && !isJunk(colB)) {
-      teams[curNum].name = colB;
-    }
+    if (!teams[curNum].name && colB && !isJunk(colB)) teams[curNum].name = colB;
     if (colD && colD !== '#N/A' && !isJunk(colD)) {
       teams[curNum].players.push([colC, colD, colE, colF, colG, colH]);
     }
@@ -453,25 +523,24 @@ function renderBlocks(blocks, container) {
     div.innerHTML = `
       <div class="team-block-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
         <div class="team-title">${block.name}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;">
+          <div style="font-size:10px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;">Top 7 HRs</div>
+          <div class="team-hrs">${top7HR}</div>
+        </div>
       </div>
       <div class="team-block-body">
         <table>
-          <thead>
-            <tr style="background:#0d2540;">
-              <td colspan="6" style="padding:10px 12px;text-align:center;font-size:13px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;font-weight:bold;">Top 7 Total &nbsp;<span style="font-size:18px;font-weight:bold;color:#d4451e;">${top7HR}</span></td>
-            </tr>
-            <tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr>
-          </thead>
+          <thead><tr>
+            <th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th>
+            <th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th>
+          </tr></thead>
           <tbody>
             ${block.players.map(p => {
               const rank = parseInt(p[4]);
               const isTop7 = rank >= 1 && rank <= 7;
               return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
-                <td class="center">${p[0] !== '' ? p[0] : ''}</td>
-                <td>${p[1]}</td>
-                <td>${p[2]}</td>
-                <td class="hr-num">${p[3]}</td>
-                <td class="center">${p[4]}</td>
+                <td class="center">${p[0]||''}</td><td>${p[1]}</td><td>${p[2]}</td>
+                <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
                 <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
               </tr>`;
             }).join('')}
@@ -482,7 +551,7 @@ function renderBlocks(blocks, container) {
   }
 }
 
-// INDIVIDUAL ROSTER
+// ── INDIVIDUAL ROSTER ─────────────────────────────────────────────────────────
 async function loadIndividual() {
   try {
     const rows = await fetchSheet('master');
@@ -507,8 +576,6 @@ function showIndividualTeam(idx) {
   const sel = document.getElementById('individual-select');
   if (!idx || !sel._blocks) { display.innerHTML = '<p style="color:#8fb3d4;font-size:13px;padding:20px 0;">Select a team above.</p>'; return; }
   const block = sel._blocks[idx];
-
-  // Calculate Top 7 HRs (players with rank 1-7)
   const top7HR = block.players
     .filter(p => { const r = parseInt(p[4]); return r >= 1 && r <= 7; })
     .reduce((sum, p) => sum + (parseInt(p[3]) || 0), 0);
@@ -524,14 +591,17 @@ function showIndividualTeam(idx) {
             <tr style="background:#0d2540;">
               <td colspan="6" style="padding:10px 12px;text-align:center;font-size:13px;color:#8fb3d4;text-transform:uppercase;letter-spacing:0.05em;font-weight:bold;">Top 7 Total &nbsp;<span style="font-size:18px;font-weight:bold;color:#d4451e;">${top7HR}</span></td>
             </tr>
-            <tr><th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th><th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th></tr>
+            <tr>
+              <th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th>
+              <th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th>
+            </tr>
           </thead>
           <tbody>
             ${block.players.map(p => {
               const rank = parseInt(p[4]);
               const isTop7 = rank >= 1 && rank <= 7;
               return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
-                <td class="center">${p[0] !== '' ? p[0] : ''}</td><td>${p[1]}</td><td>${p[2]}</td>
+                <td class="center">${p[0]||''}</td><td>${p[1]}</td><td>${p[2]}</td>
                 <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
                 <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
               </tr>`;
@@ -542,8 +612,8 @@ function showIndividualTeam(idx) {
     </div>`;
 }
 
-// GENERIC TABLE
-async function loadGeneric(key, headId, bodyId, updatedId) {
+// ── GENERIC TABLE (with sortable headers) ─────────────────────────────────────
+async function loadGeneric(key, headId, bodyId, updatedId, tableId) {
   try {
     const rows = await fetchSheet(key);
     const head = document.getElementById(headId);
@@ -552,7 +622,7 @@ async function loadGeneric(key, headId, bodyId, updatedId) {
     for (let i = 0; i < Math.min(5, rows.length); i++) {
       if (rows[i].filter(c => String(c).trim()).length >= 3) { hi = i; break; }
     }
-    head.innerHTML = rows[hi].map(h => `<th>${h}</th>`).join('');
+    head.innerHTML = rows[hi].map((h, i) => `<th onclick="sortTable('${tableId}',${i},this)">${h}</th>`).join('');
     body.innerHTML = '';
     for (let i = hi+1; i < rows.length; i++) {
       const r = rows[i];
@@ -567,7 +637,7 @@ async function loadGeneric(key, headId, bodyId, updatedId) {
   }
 }
 
-// IL
+// ── IL ────────────────────────────────────────────────────────────────────────
 async function loadIL() {
   try {
     const rows = await fetchSheet('il');
@@ -577,7 +647,7 @@ async function loadIL() {
     for (let i = 0; i < Math.min(5, rows.length); i++) {
       if (rows[i].filter(c => String(c).trim()).length >= 3) { hi = i; break; }
     }
-    head.innerHTML = rows[hi].map(h => `<th>${h}</th>`).join('');
+    head.innerHTML = rows[hi].map((h, i) => `<th onclick="sortTable('il-table',${i},this)">${h}</th>`).join('');
     body.innerHTML = '';
     let count = 0;
     for (let i = hi+1; i < rows.length; i++) {
@@ -601,6 +671,7 @@ async function loadIL() {
   }
 }
 
+// ── FILTERS ───────────────────────────────────────────────────────────────────
 function filterTable(tableId, q) {
   q = q.toLowerCase();
   document.querySelectorAll('#' + tableId + ' tbody tr').forEach(tr => {
