@@ -679,7 +679,7 @@ function ilBadge(v) {
   if (!s) return '';
   const sl = s.toLowerCase();
   if (sl === 'active') return `<span class="badge badge-active">${s}</span>`;
-  if (sl.includes('60') || sl.includes('out for season') || sl.includes('out for year'))
+  if (sl.includes('60') || sl.includes('out for season') || sl.includes('out for year') || sl.includes('full season'))
     return `<span class="badge badge-il">${s}</span>`;
   return `<span class="badge badge-day">${s}</span>`;
 }
