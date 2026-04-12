@@ -148,7 +148,7 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
         </tr>
         <tr style="border-bottom:1px solid #1e3a5f;">
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">• Injury Alerts</td>
-          <td style="padding:8px 12px;color:#c8d8e8;"><strong style="color:#97c459;">60-DAY &amp; OUT FOR SEASON</strong> players highlighted in <strong style="color:#97c459;">GREEN</strong>.</td>
+          <td style="padding:8px 12px;color:#c8d8e8;"><strong style="color:#97c459;">Active</strong> players shown in <strong style="color:#97c459;">GREEN</strong>. <strong style="color:#ef9f27;">7/10/15/30-Day IL</strong> shown in <strong style="color:#ef9f27;">YELLOW</strong>. <strong style="color:#f09595;">60-Day IL &amp; Out for Season</strong> shown in <strong style="color:#f09595;">RED</strong>.</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;color:#fff;font-weight:bold;">• Auto-Ranking</td>
@@ -541,7 +541,7 @@ function renderBlocks(blocks, container) {
               return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
                 <td class="center">${p[0]||''}</td><td>${p[1]}</td><td>${p[2]}</td>
                 <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
-                <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
+                <td>${ilBadge(p[5])}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -603,7 +603,7 @@ function showIndividualTeam(idx) {
               return `<tr style="${isTop7 ? 'font-weight:bold;' : ''}">
                 <td class="center">${p[0]||''}</td><td>${p[1]}</td><td>${p[2]}</td>
                 <td class="hr-num">${p[3]}</td><td class="center">${p[4]}</td>
-                <td>${p[5] ? `<span class="badge badge-il">${p[5]}</span>` : ''}</td>
+                <td>${ilBadge(p[5])}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -657,9 +657,13 @@ async function loadIL() {
       const tr = document.createElement('tr');
       tr.innerHTML = r.map(c => {
         const v = String(c);
-        if (v==='IL-10'||v==='IL-15'||v==='IL-60'||v==='IL') return `<td><span class="badge badge-il">${v}</span></td>`;
+        const vl = v.toLowerCase();
+        if (vl === 'active') return `<td>${ilBadge(v)}</td>`;
+        if (v==='IL-10'||v==='IL-15'||v==='IL-7'||vl.includes('7-day')||vl.includes('10-day')||vl.includes('15-day')||vl.includes('30-day'))
+          return `<td>${ilBadge(v)}</td>`;
+        if (v==='IL-60'||v==='IL'||vl.includes('60')||vl.includes('out for season')||vl.includes('out for year'))
+          return `<td>${ilBadge(v)}</td>`;
         if (v==='DTD') return `<td><span class="badge badge-day">${v}</span></td>`;
-        if (v==='Active') return `<td><span class="badge badge-active">${v}</span></td>`;
         return `<td>${v}</td>`;
       }).join('');
       body.appendChild(tr);
@@ -669,6 +673,18 @@ async function loadIL() {
   } catch(e) {
     document.getElementById('il-body').innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load IL. ${e.message}</div></td></tr>`;
   }
+}
+
+// ── IL BADGE HELPER ───────────────────────────────────────────────────────────
+function ilBadge(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  if (!s) return '';
+  const sl = s.toLowerCase();
+  if (sl === 'active') return `<span class="badge badge-active">${s}</span>`;
+  if (sl.includes('60') || sl.includes('out for season') || sl.includes('out for year'))
+    return `<span class="badge badge-il">${s}</span>`;
+  return `<span class="badge badge-day">${s}</span>`;
 }
 
 // ── FILTERS ───────────────────────────────────────────────────────────────────
