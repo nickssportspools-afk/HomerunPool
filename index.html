@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+Here's the complete file — select all and replace with this:
+html<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -399,10 +400,8 @@ async function loadStandings() {
       data.push({ team, total: Number(total)||0, back: Number(back)||0 });
     }
 
-    // Sort: Total DESC, Team Name ASC
     data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
 
-    // Assign places accounting for ties
     let place = 1;
     for (let i = 0; i < data.length; i++) {
       if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
@@ -442,10 +441,8 @@ async function loadMonthly() {
       data.push({ team, total:Number(total)||0, mar:Number(mar)||0, may:Number(may)||0, jun:Number(jun)||0, jul:Number(jul)||0, aug:Number(aug)||0, sep:Number(sep)||0 });
     }
 
-    // Sort: Total DESC, Team Name ASC
     data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
 
-    // Assign places accounting for ties
     let place = 1;
     for (let i = 0; i < data.length; i++) {
       if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
