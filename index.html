@@ -454,7 +454,7 @@ for (let i = 0; i < data.length; i++) {
 
     data.forEach(d => {
       const tr = document.createElement('tr');
-      <td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.may}</td>
+      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.may}</td><td class="center">${d.jun}</td><td class="center">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
       body.appendChild(tr);
     });
 
