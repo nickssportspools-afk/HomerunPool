@@ -441,11 +441,14 @@ async function loadMonthly() {
       data.push({ team, total:Number(total)||0, mar:Number(mar)||0, may:Number(may)||0, jun:Number(jun)||0, jul:Number(jul)||0, aug:Number(aug)||0, sep:Number(sep)||0 });
     }
 
-    data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
+    const now = new Date();
+const mon = now.getMonth() + 1;
+let mKey = mon <= 4 ? 'mar' : mon === 5 ? 'may' : mon === 6 ? 'jun' : mon === 7 ? 'jul' : mon === 8 ? 'aug' : 'sep';
+data.sort((a, b) => b[mKey] - a[mKey] || b.total - a.total || a.team.localeCompare(b.team));
 
-    let place = 1;
-    for (let i = 0; i < data.length; i++) {
-      if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
+let place = 1;
+for (let i = 0; i < data.length; i++) {
+  if (i > 0 && data[i][mKey] < data[i-1][mKey]) place = i + 1;
       data[i].place = place;
     }
 
