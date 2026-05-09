@@ -653,6 +653,7 @@ async function loadIL() {
     for (let i = hi+1; i < rows.length; i++) {
       const r = rows[i];
       if (r.every(c => !String(c).trim())) continue;
+      if (String(r[0]).toLowerCase().includes('last updated')) continue;
       count++;
       const tr = document.createElement('tr');
       tr.innerHTML = r.map(c => {
