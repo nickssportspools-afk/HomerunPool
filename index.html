@@ -1,5 +1,4 @@
-Here's the complete file — select all and replace with this:
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -68,7 +67,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
 </style>
 </head>
 <body>
-
 <div class="site-header">
   <div class="ball">⚾</div>
   <div>
@@ -77,7 +75,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
   </div>
   <a href="https://www.nickssportspools.com" target="_blank">↗ NicksSportsPools.com</a>
 </div>
-
 <div class="tab-bar">
   <button class="tab-btn active" onclick="showTab('readme',this)">ℹ️ Read Me</button>
   <button class="tab-btn" onclick="showTab('master',this)">📋 Main Rosters</button>
@@ -89,9 +86,7 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
   <button class="tab-btn" onclick="showTab('injury-replace',this)">🔄 Injury Replacements</button>
   <button class="tab-btn" onclick="showTab('il',this)">🏥 IL</button>
 </div>
-
 <div class="content">
-
   <div id="readme" class="section active">
     <div class="section-title">Read Me</div>
     <div style="background:#0f2236;border-radius:8px;padding:20px;">
@@ -158,7 +153,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
       </table>
     </div>
   </div>
-
   <div id="master" class="section">
     <div class="section-title">Main Rosters <span id="master-count"></span></div>
     <div class="filter-row">
@@ -167,7 +161,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     <div id="master-blocks"><div class="loading">Loading rosters</div></div>
     <p class="updated" id="master-updated"></p>
   </div>
-
   <div id="individual" class="section">
     <div class="section-title">Individual Roster Lookup</div>
     <div class="filter-row">
@@ -178,7 +171,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     <div id="individual-display"><p style="color:#8fb3d4;font-size:13px;padding:20px 0;">Select a team above to view their roster.</p></div>
     <p class="updated" id="individual-updated"></p>
   </div>
-
   <div id="standings" class="section">
     <div class="section-title">Season Standings <span id="standings-count"></span></div>
     <div class="filter-row">
@@ -197,7 +189,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="standings-updated"></p>
   </div>
-
   <div id="monthly" class="section">
     <div class="section-title">Monthly Standings</div>
     <div class="table-wrap">
@@ -208,7 +199,7 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
           <th class="center" onclick="sortTable('monthly-table',2,this)">Total</th>
           <th class="center" onclick="sortTable('monthly-table',3,this)">March/April</th>
           <th class="center" onclick="sortTable('monthly-table',4,this)">May</th>
-          <th class="center" onclick="sortTable('monthly-table',5,this)" style="color:#39FF14;">June</th>
+          <th class="center" onclick="sortTable('monthly-table',5,this)" style="color:#39FF14;background-color:rgba(57,255,20,0.15);">June</th>
           <th class="center" onclick="sortTable('monthly-table',6,this)">July</th>
           <th class="center" onclick="sortTable('monthly-table',7,this)">August</th>
           <th class="center" onclick="sortTable('monthly-table',8,this)">Sept</th>
@@ -218,7 +209,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="monthly-updated"></p>
   </div>
-
   <div id="hrstats" class="section">
     <div class="section-title">HR Derby Player Stats</div>
     <div class="filter-row">
@@ -232,7 +222,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="hr-updated"></p>
   </div>
-
   <div id="mlbstats" class="section">
     <div class="section-title">MLB Player Stats</div>
     <div class="filter-row">
@@ -246,7 +235,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="mlb-updated"></p>
   </div>
-
   <div id="injury-replace" class="section">
     <div class="section-title">Player List — Injury Replacements</div>
     <div class="filter-row">
@@ -260,7 +248,6 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="ir-updated"></p>
   </div>
-
   <div id="il" class="section">
     <div class="section-title">Injured List <span id="il-count"></span></div>
     <div class="filter-row">
@@ -274,9 +261,7 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
     </div>
     <p class="updated" id="il-updated"></p>
   </div>
-
 </div>
-
 <script>
 const WEB_APP = 'https://script.google.com/macros/s/AKfycbx7fjDIHiMmfhLbxDUdxtLhQGVXCe7VGXBnSISCi0mdyu4Fll2hi2Xnfy5cCzTrFRmE/exec';
 const SHEETS = {
@@ -288,11 +273,9 @@ const SHEETS = {
   irlist:   'Player List - Injury Replacement',
   il:       'IL'
 };
-
 const cache = {};
 const loaded = {};
 const tableSortState = {};
-
 function fetchSheet(key) {
   if (cache[key]) return Promise.resolve(cache[key]);
   return new Promise((resolve, reject) => {
@@ -316,11 +299,9 @@ function fetchSheet(key) {
     document.body.appendChild(script);
   });
 }
-
 function ts() {
   return new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 }
-
 function isJunk(val) {
   if (!val && val !== 0) return true;
   const v = String(val).toLowerCase().trim();
@@ -336,7 +317,6 @@ function isJunk(val) {
   if (/\d{4}\s+at\s+\d/.test(v)) return true;
   return false;
 }
-
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -344,7 +324,6 @@ function showTab(id, btn) {
   btn.classList.add('active');
   if (!loaded[id]) { loaded[id] = true; loadTab(id); }
 }
-
 function loadTab(id) {
   switch(id) {
     case 'master':         loadMaster(); break;
@@ -357,7 +336,6 @@ function loadTab(id) {
     case 'il':             loadIL(); break;
   }
 }
-
 // ── SORTABLE TABLE ────────────────────────────────────────────────────────────
 function sortTable(tableId, colIdx, thEl) {
   const table = document.getElementById(tableId);
@@ -366,10 +344,8 @@ function sortTable(tableId, colIdx, thEl) {
   const state = tableSortState[tableId] || {};
   const asc = (state.col === colIdx) ? !state.asc : true;
   tableSortState[tableId] = { col: colIdx, asc };
-
   table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
   thEl.classList.add(asc ? 'sort-asc' : 'sort-desc');
-
   rows.sort((a, b) => {
     const aCells = a.querySelectorAll('td');
     const bCells = b.querySelectorAll('td');
@@ -381,10 +357,8 @@ function sortTable(tableId, colIdx, thEl) {
     if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
     return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
   });
-
   rows.forEach(r => tbody.appendChild(r));
 }
-
 // ── SEASON STANDINGS (sorted client-side) ─────────────────────────────────────
 async function loadStandings() {
   try {
@@ -399,28 +373,23 @@ async function loadStandings() {
       if (!team || isJunk(team)) continue;
       data.push({ team, total: Number(total)||0, back: Number(back)||0 });
     }
-
     data.sort((a, b) => b.total - a.total || a.team.localeCompare(b.team));
-
     let place = 1;
     for (let i = 0; i < data.length; i++) {
       if (i > 0 && data[i].total < data[i-1].total) place = i + 1;
       data[i].place = place;
     }
-
     data.forEach(d => {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.back}</td>`;
       body.appendChild(tr);
     });
-
     document.getElementById('standings-count').textContent = '· ' + data.length + ' teams';
     document.getElementById('standings-updated').textContent = 'Updated: ' + ts();
   } catch(e) {
     document.getElementById('standings-body').innerHTML = `<tr><td colspan="4"><div class="error-msg">Could not load standings. ${e.message}</div></td></tr>`;
   }
 }
-
 // ── MONTHLY STANDINGS (sorted client-side) ────────────────────────────────────
 async function loadMonthly() {
   try {
@@ -440,33 +409,27 @@ async function loadMonthly() {
       if (!team || isJunk(team)) continue;
       data.push({ team, total:Number(total)||0, mar:Number(mar)||0, may:Number(may)||0, jun:Number(jun)||0, jul:Number(jul)||0, aug:Number(aug)||0, sep:Number(sep)||0 });
     }
-
     const now = new Date();
-const mon = now.getMonth() + 1;
-let mKey = mon <= 4 ? 'mar' : mon === 5 ? 'may' : mon === 6 ? 'jun' : mon === 7 ? 'jul' : mon === 8 ? 'aug' : 'sep';
-data.sort((a, b) => b[mKey] - a[mKey] || b.total - a.total || a.team.localeCompare(b.team));
-
-let place = 1;
-for (let i = 0; i < data.length; i++) {
-  if (i > 0 && data[i][mKey] < data[i-1][mKey]) place = i + 1;
+    const mon = now.getMonth() + 1;
+    let mKey = mon <= 4 ? 'mar' : mon === 5 ? 'may' : mon === 6 ? 'jun' : mon === 7 ? 'jul' : mon === 8 ? 'aug' : 'sep';
+    data.sort((a, b) => b[mKey] - a[mKey] || b.total - a.total || a.team.localeCompare(b.team));
+    let place = 1;
+    for (let i = 0; i < data.length; i++) {
+      if (i > 0 && data[i][mKey] < data[i-1][mKey]) place = i + 1;
       data[i].place = place;
     }
-
     data.forEach(d => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.may}</td><td class="center">${d.jun}</td><td class="center">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
+      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center">${d.may}</td><td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.jun}</td><td class="center">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
       body.appendChild(tr);
     });
-
     document.getElementById('monthly-updated').textContent = 'Updated: ' + ts();
   } catch(e) {
     document.getElementById('monthly-body').innerHTML = `<tr><td colspan="9"><div class="error-msg">Could not load monthly standings. ${e.message}</div></td></tr>`;
   }
 }
-
 // ── MASTER ROSTER ─────────────────────────────────────────────────────────────
 let masterBlocks = [];
-
 async function loadMaster() {
   const container = document.getElementById('master-blocks');
   try {
@@ -479,7 +442,6 @@ async function loadMaster() {
     container.innerHTML = `<div class="error-msg">Could not load rosters. ${e.message}</div>`;
   }
 }
-
 function parseMaster(rows) {
   const teams = {};
   const order = [];
@@ -510,7 +472,6 @@ function parseMaster(rows) {
   }
   return order.map(n => teams[n]).filter(t => t.name && t.players.length > 0);
 }
-
 function renderBlocks(blocks, container) {
   container.innerHTML = '';
   for (const block of blocks) {
@@ -550,7 +511,6 @@ function renderBlocks(blocks, container) {
     container.appendChild(div);
   }
 }
-
 // ── INDIVIDUAL ROSTER ─────────────────────────────────────────────────────────
 async function loadIndividual() {
   try {
@@ -570,7 +530,6 @@ async function loadIndividual() {
     document.getElementById('individual-display').innerHTML = `<div class="error-msg">Could not load roster. ${e.message}</div>`;
   }
 }
-
 function showIndividualTeam(idx) {
   const display = document.getElementById('individual-display');
   const sel = document.getElementById('individual-select');
@@ -579,7 +538,6 @@ function showIndividualTeam(idx) {
   const top7HR = block.players
     .filter(p => { const r = parseInt(p[4]); return r >= 1 && r <= 7; })
     .reduce((sum, p) => sum + (parseInt(p[3]) || 0), 0);
-
   display.innerHTML = `
     <div class="team-block">
       <div class="team-block-header">
@@ -611,7 +569,6 @@ function showIndividualTeam(idx) {
       </div>
     </div>`;
 }
-
 // ── GENERIC TABLE (with sortable headers) ─────────────────────────────────────
 async function loadGeneric(key, headId, bodyId, updatedId, tableId) {
   try {
@@ -636,7 +593,6 @@ async function loadGeneric(key, headId, bodyId, updatedId, tableId) {
     document.getElementById(bodyId).innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load data. ${e.message}</div></td></tr>`;
   }
 }
-
 // ── IL ────────────────────────────────────────────────────────────────────────
 async function loadIL() {
   try {
@@ -675,7 +631,6 @@ async function loadIL() {
     document.getElementById('il-body').innerHTML = `<tr><td colspan="10"><div class="error-msg">Could not load IL. ${e.message}</div></td></tr>`;
   }
 }
-
 // ── IL BADGE HELPER ───────────────────────────────────────────────────────────
 function ilBadge(v) {
   if (!v) return '';
@@ -687,7 +642,6 @@ function ilBadge(v) {
     return `<span class="badge badge-il">${s}</span>`;
   return `<span class="badge badge-day">${s}</span>`;
 }
-
 // ── FILTERS ───────────────────────────────────────────────────────────────────
 function filterTable(tableId, q) {
   q = q.toLowerCase();
@@ -695,7 +649,6 @@ function filterTable(tableId, q) {
     tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
   });
 }
-
 function filterBlocks(q) {
   q = q.toLowerCase();
   document.querySelectorAll('#master-blocks .team-block').forEach(b => {
