@@ -304,6 +304,20 @@ function fetchSheet(key) {
 function ts() {
   return new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 }
+function fmtDate(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  if (!s) return '';
+  // Try parsing as date
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    const yr = String(d.getFullYear()).slice(-2);
+    return m + '/' + day + '/' + yr;
+  }
+  return s;
+}
 function isJunk(val) {
   if (!val && val !== 0) return true;
   const v = String(val).toLowerCase().trim();
@@ -455,7 +469,7 @@ function parseMaster(rows) {
     const colG = r[6] !== undefined ? String(r[6]).trim() : '';
     const colH = r[7] !== undefined ? String(r[7]).trim() : '';
     const colJ = r[9] !== undefined ? String(r[9]).trim() : '';
-    const colK = r[10] !== undefined ? String(r[10]).trim() : '';
+    const colK = r[10] !== undefined ? fmtDate(r[10]) : '';
     if (colA === '# Teams' || colB === 'ENTRY NAME') continue;
     if (colB.toUpperCase() === 'TOTALS') continue;
     if (colA && !isNaN(colA) && colA !== '') {
@@ -494,7 +508,7 @@ function renderBlocks(blocks, container) {
           <thead><tr>
             <th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th>
             <th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th>
-            <th>Replacement</th><th>Repl. Date</th>
+            <th>Replaced Player</th><th>Repl. Date</th>
           </tr></thead>
           <tbody>
             ${block.players.map(p => {
@@ -554,7 +568,7 @@ function showIndividualTeam(idx) {
             <tr>
               <th class="center">Weighted HRs</th><th>Player</th><th>MLB Team</th>
               <th class="center">2026 HRs</th><th class="center">Rank</th><th>IL</th>
-              <th>Replacement</th><th>Repl. Date</th>
+              <th>Replaced Player</th><th>Repl. Date</th>
             </tr>
           </thead>
           <tbody>
