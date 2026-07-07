@@ -201,8 +201,8 @@ tbody tr:nth-child(even):hover { background: #0f2236; }
           <th class="center" onclick="sortTable('monthly-table',2,this)">Total</th>
           <th class="center" onclick="sortTable('monthly-table',3,this)">March/April</th>
           <th class="center" onclick="sortTable('monthly-table',4,this)">May</th>
-          <th class="center" onclick="sortTable('monthly-table',5,this)" style="color:#39FF14;background-color:rgba(57,255,20,0.15);">June</th>
-          <th class="center" onclick="sortTable('monthly-table',6,this)">July</th>
+          <th class="center" onclick="sortTable('monthly-table',5,this)">June</th>
+          <th class="center" onclick="sortTable('monthly-table',6,this)" style="color:#39FF14;background-color:rgba(57,255,20,0.15);">July</th>
           <th class="center" onclick="sortTable('monthly-table',7,this)">August</th>
           <th class="center" onclick="sortTable('monthly-table',8,this)">Sept</th>
         </tr></thead>
@@ -433,7 +433,7 @@ async function loadMonthly() {
     }
     data.forEach(d => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center">${d.may}</td><td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.jun}</td><td class="center">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
+      tr.innerHTML = `<td class="center">${d.place}</td><td>${d.team}</td><td class="center">${d.total}</td><td class="center">${d.mar}</td><td class="center">${d.may}</td><td class="center">${d.jun}</td><td class="center" style="background-color:rgba(57,255,20,0.15);color:#39FF14;">${d.jul}</td><td class="center">${d.aug}</td><td class="center">${d.sep}</td>`;
       body.appendChild(tr);
     });
     document.getElementById('monthly-updated').textContent = 'Updated: ' + ts();
